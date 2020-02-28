@@ -1,0 +1,12 @@
+---
+# defaults file for docker_buildnode
+docker_required_packages:
+  - git
+  - yum-utils
+  - device-mapper-persistent-data
+  - lvm2
+  - pygpgme
+
+docker_pkg_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
+
+docker_package: docker-ce

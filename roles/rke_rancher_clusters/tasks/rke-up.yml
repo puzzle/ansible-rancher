@@ -1,0 +1,15 @@
+---
+- name: "RUN rke up"
+  command: "{{ rke_cluster_bin }} up --config {{ rke_cluster_config }}"
+  register: rke_up_result
+  changed_when: false
+
+- name: "rke up Result"
+  debug:
+    msg: "{{ rke_up_result.stdout }}"
+  when: rke_up_result is not skipped
+
+- name: Check that KubeConfig exists
+  stat:
+    path: "{{ rke_cluster_kube_config }}"
+  register: kubeconfig_result

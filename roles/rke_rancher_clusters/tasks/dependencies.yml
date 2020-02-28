@@ -1,0 +1,29 @@
+---
+- name: Download RKE Binary from Github
+  get_url:
+    url: "{{ rke_binary_download_url }}"
+    dest: "./{{ rke_cluster_bin }}"
+    mode: 0777
+  changed_when: false
+
+- name: Download kubectl binary
+  get_url:
+    url: "{{ kubectl_binary_download_url }}"
+    dest: "{{ kubectl_binary }}"
+    mode: 0777
+  changed_when: false
+
+- name: Retrieve helm binary archive.
+  unarchive:
+    src: "{{ helm_binary_download_url }}"
+    dest: "./"
+    remote_src: yes
+  changed_when: false
+  check_mode: no
+
+- name: Move helm binary into place.
+  copy:
+    src: "linux-amd64/helm"
+    dest: "{{ helm_binary }}"
+    mode: 0755
+  changed_when: false

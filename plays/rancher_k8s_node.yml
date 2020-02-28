@@ -1,0 +1,6 @@
+---
+- name: playbook to install/prepare k8s nodes for Rancher
+  hosts: rancher_k8s_nodes
+  roles:
+    - role: docker
+    - role: rke_node

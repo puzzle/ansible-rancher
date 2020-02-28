@@ -1,0 +1,11 @@
+rancher_failover_ip: []
+  # - vip: 5.102.151.127
+  #   router_id: 50
+  #   master: rancher01
+rancher_failover_ipv6: []
+
+certmanager_enabled: false
+rancher_letsencrypt_email: sys@puzzle.ch # Only needed when certmanager_enabled is true
+
+rancher_hostname: "" # Make sure this is set
+rancher_admin_password: "mys3cret" # local admin user account

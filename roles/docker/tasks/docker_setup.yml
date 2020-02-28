@@ -1,0 +1,57 @@
+---
+
+# Basic Setup for Docker Buildnodes (CentOS)
+- name: install required packages
+  yum:
+    name: "{{ docker_required_packages }}"
+    state: present
+
+- name: add docker repository
+  get_url:
+    url: "{{ docker_pkg_repo }}"
+    dest: /etc/yum.repos.d/docker-ce.repo
+
+- name: install docker
+  yum:
+    name: "{{ docker_package }}"
+    state: present
+
+- name: Enable IP Forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: enable and start docker
+  systemd:
+    name: docker
+    daemon-reload: yes
+    enabled: yes
+    state: started
+
+- name: setup a cronjob for docker cleanup
+  cron:
+    name: docker cleanup
+    minute: "00"
+    hour: "21"
+    user: root
+    job: 'docker system prune -f --filter "until=2h" -a >/dev/null 2>&1'
+    cron_file: docker_cleanup
+
+- name: setup a cronjob for docker volumes cleanup
+  cron:
+    name: docker volumes cleanup
+    minute: "15"
+    hour: "21"
+    user: root
+    job: 'for vol in $(docker volume ls -q -f dangling=true); do docker volume rm $vol >/dev/null 2>&1; done'
+    cron_file: docker_cleanup
+
+- name: adding existing user '{{ ansible_user }}' to group docker
+  user:
+    name: '{{ ansible_user }}'
+    groups: docker
+    append: yes
+

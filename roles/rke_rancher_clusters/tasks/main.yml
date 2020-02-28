@@ -1,0 +1,48 @@
+---
+    
+- name: Download binary dependencies
+  delegate_to: localhost
+  import_tasks: dependencies.yml
+
+- name: RKE Config
+  delegate_to: localhost
+  import_tasks: rke-config.yml
+
+- name: RKE Up
+  delegate_to: localhost
+  import_tasks: rke-up.yml
+
+- name: Configure k8s cluster
+  delegate_to: localhost
+  import_tasks: configure-cluster.yml
+  when: kubeconfig_result.stat.exists
+
+- name: Get Rancher Install Status for first time setup check
+  delegate_to: localhost
+  uri:
+    url: "https://{{ rancher_hostname }}/ping"
+    validate_certs: no
+    return_content: true
+    status_code:
+    - -1 # For cases where nginx ingress controller is not yet ready
+    - 200 # Rancher should be installed
+    - 404 # Rancher is not yet installed
+  register: rancher_installed
+  check_mode: no
+  changed_when: false
+
+- name: Set Rancher install status
+  set_fact:
+    rancher_installed: "{{ rancher_installed.content.find('pong') != -1 }}"
+
+- name: Install/update Rancher
+  delegate_to: localhost
+  import_tasks: rancher.yml
+  when:
+    - kubeconfig_result.stat.exists
+
+- name: Rancher initial setup (only on first time setup)
+  delegate_to: localhost
+  import_tasks: rancher-initial-setup.yml
+  when:
+    - not rancher_installed

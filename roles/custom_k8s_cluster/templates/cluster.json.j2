@@ -1,0 +1,72 @@
+{
+  "dockerRootDir": "/var/lib/docker",
+  "enableClusterAlerting": false,
+  "enableClusterMonitoring": false,
+  "enableNetworkPolicy": {{ custom_k8s_cluster_enable_network_policy | lower }},
+  "type": "cluster",
+  "name": "{{ custom_k8s_cluster_name }}",
+  "rancherKubernetesEngineConfig": {
+    "addonJobTimeout": 30,
+    "ignoreDockerVersion": true,
+    "sshAgentAuth": false,
+    "type": "rancherKubernetesEngineConfig",
+    "kubernetesVersion": "{{ custom_k8s_cluster_kubernetes_version }}",
+    "authentication": {
+      "strategy": "x509",
+      "type": "authnConfig"
+    },
+    "network": {
+      "plugin": "canal",
+      "type": "networkConfig",
+      "options": {
+        "flannel_backend_type": "vxlan"
+      }
+    },
+    "ingress": {
+      "provider": "{{ custom_k8s_clusters_ingress_provider }}",
+      "type": "ingressConfig"
+    },
+    "monitoring": {
+      "provider": "metrics-server",
+      "type": "monitoringConfig"
+    },
+    "services": {
+      "type": "rkeConfigServices",
+      "kubeApi": {
+        "extra_args": {
+          "feature-gates": "MountPropagation=true"
+        },
+        "alwaysPullImages": false,
+        "podSecurityPolicy": true,
+        "serviceNodePortRange": "30000-32767",
+        "type": "kubeAPIService"
+      },
+      "kubelet": {
+        "extra_args": {
+          "feature-gates": "MountPropagation=true"
+        }
+      },
+      "etcd": {
+        "creation": "12h",
+        "extraArgs": {
+          "heartbeat-interval": 500,
+          "election-timeout": 5000
+        },
+        "retention": "72h",
+        "snapshot": false,
+        "type": "etcdService",
+        "backupConfig": {
+          "enabled": true,
+          "intervalHours": 6,
+          "retention": 12,
+          "type": "backupConfig"
+        }
+      }
+    }
+  },
+  "localClusterAuthEndpoint": {
+    "enabled": true,
+    "type": "localClusterAuthEndpoint"
+  },
+  "defaultPodSecurityPolicyTemplateId": "{{ custom_k8s_clusters_default_psp | lower }}"
+}

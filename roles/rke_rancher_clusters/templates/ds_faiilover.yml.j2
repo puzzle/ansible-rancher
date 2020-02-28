@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ipfailover-{{ item.vip | replace(":","-")}}
+  namespace: ipfailover
+  labels:
+    failover: failover-{{ item.vip | replace(":","-") }}
+spec:
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      failover: failover-{{ item.vip | replace(":","-") }}
+  template:
+    metadata:
+      labels:
+        failover: failover-{{ item.vip | replace(":","-") }}
+    spec:
+      containers:
+      - env:
+        - name: API_TOKEN
+          value: {{ cloudscale_api_token }}
+        - name: KEEPALIVED_NOTIFY
+          value: /tmp/failoverscripts/notify.sh
+        - name: KEEPALIVED_ROUTER_ID
+          value: "{{ item.router_id }}"
+        - name: KEEPALIVED_UNICAST_PEERS
+          value: '#PYTHON2BASH:[{{ unicast_peers }}]'
+        - name: KEEPALIVED_VIRTUAL_IPS
+          value: '#PYTHON2BASH:[''{{ item.vip }}'']'
+        - name: MASTER_HOST
+          value: {{ item.master }}
+        - name: SERVER_IDS
+          value: '#PYTHON2BASH:[{{ server_ids }}]'
+        image: puzzle/keepalived:2.0.19
+        imagePullPolicy: Always
+        livenessProbe:
+          exec:
+            command:
+            - /tmp/failoverscripts/check.py
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: ipfailover1
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_ADMIN
+          privileged: false
+          procMount: Default
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/failoverscripts/
+          name: config
+      hostNetwork: true
+      volumes:
+      - configMap:
+          defaultMode: 511
+          name: keepalived-failover
+          optional: false
+        name: config

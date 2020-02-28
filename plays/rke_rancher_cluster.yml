@@ -1,0 +1,6 @@
+---
+- name: playbook to install a k8s cluster with rke and deploy Rancher Control Plane
+  hosts: rke_rancher_clusters
+  gather_facts: no
+  roles:
+    - role: rke_rancher_clusters

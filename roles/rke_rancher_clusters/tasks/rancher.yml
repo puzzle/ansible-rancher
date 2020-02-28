@@ -1,0 +1,55 @@
+---
+
+- name: Add Rancher Repo to Helm
+  command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ rancher_repo }} {{ rancher_repo_url }}"
+  changed_when: false
+
+- name: Add Jetstack Cert-Manager Repo to Helm
+  command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ jetstack_repo }} {{ jetstack_repo_url }}"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Update Helm Repo
+  command: "{{ helm_binary }} repo update --kubeconfig {{ rke_cluster_kube_config }}"
+  changed_when: false
+
+- name: Install Cert-Manager
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace kube-system --version {{ rancher_certmanager_version }} cert-manager {{ jetstack_repo }}/cert-manager"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Wait for certmanager to be ready
+  command: "{{ kubectl_binary }} -n kube-system --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Install Rancher with Let's Encrypt
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=letsEncrypt --set letsEncrypt.email={{ rancher_letsencrypt_email }} --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Install Rancher without Let's Encrypt
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  changed_when: false
+  when:
+  - not certmanager_enabled
+
+
+- name: Wait for Rancher Deployment to be ready
+  command: "{{ kubectl_binary }} -n cattle-system --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/rancher"
+  changed_when: false
+
+- name: Wait for Rancher to be ready
+  command: "curl -k --silent https://{{ rancher_hostname }}/ping"
+  args:
+    warn: no
+  register: rancher_ready
+  until: rancher_ready.stdout.find("pong") != -1
+  retries: 24
+  delay: 5
+  changed_when: false
+  check_mode: no

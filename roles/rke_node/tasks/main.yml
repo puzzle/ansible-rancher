@@ -1,0 +1,4 @@
+---
+
+- name: Configure Firewall
+  import_tasks: firewall.yml

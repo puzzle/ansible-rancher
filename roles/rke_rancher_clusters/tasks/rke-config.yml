@@ -1,0 +1,10 @@
+---
+
+- name: Create RKE Config
+  template:
+    src: cluster.yml.j2
+    dest: "{{ rke_cluster_config }}"
+    mode: 0666
+  vars:
+    cluster: "{{ groups['rke_' + inventory_hostname] }}"
+  changed_when: false

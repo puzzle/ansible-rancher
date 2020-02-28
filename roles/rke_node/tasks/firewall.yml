@@ -1,0 +1,70 @@
+---
+
+# https://rancher.com/docs/rancher/v2.x/en/installation/requirements/
+# https://rancher.com/docs/rancher/v2.x/en/installation/options/firewall/
+
+
+- name: Open firewall for Nodes with role etcd
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 2376/tcp
+    - 2379/tcp
+    - 2380/tcp
+    - 8472/udp
+    - 9099/tcp
+    - 10250/tcp
+  when:
+    - "'etcd' in k8s_roles"
+
+- name: Open firewall for Nodes with role control_plane
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 80/tcp
+    - 443/tcp
+    - 2376/tcp
+    - 6443/tcp
+    - 8472/udp
+    - 9099/tcp
+    - 10250/tcp
+    - 10254/tcp
+    - 30000-32767/tcp
+    - 30000-32767/udp
+  when:
+    - "'control_plane' in k8s_roles"
+
+- name: Open firewall for Nodes with role worker
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - 22/tcp
+    - 80/tcp
+    - 443/tcp
+    - 2376/tcp
+    - 8472/udp
+    - 9099/tcp
+    - 10250/tcp
+    - 10254/tcp
+    - 30000-32767/tcp
+    - 30000-32767/udp
+  when:
+    - "'worker' in k8s_roles"
+
+- name: Open vrrp
+  firewalld:
+    rich_rule: rule protocol value="vrrp" accept
+    permanent: yes
+    immediate: true
+    state: enabled
+  when:
+    - "'worker' in k8s_roles"

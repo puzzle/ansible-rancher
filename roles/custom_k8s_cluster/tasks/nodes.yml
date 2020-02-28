@@ -1,0 +1,30 @@
+---
+- name: Get current nodes from Rancher Control Plane
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusters/{{ cluster.id }}/nodes"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+  register: cluster_nodes
+  check_mode: no
+
+- name: Show already added hosts
+  debug:
+    msg: "{{ cluster_nodes | json_query(\"json.data[*].hostname\") }}"
+
+  delegate_to: "{{ item }}"
+  command: "{{ custom_k8s_cluster_docker_commmand_base }} --token {{ clusterregistrationtoken }} --etcd --controlplane"
+  when:
+    - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + "']") | length) == 0
+  with_items:
+    - "{{ groups[custom_k8s_cluster_group_inventory_name + '_master'] }}"
+
+- name: Add Worker Nodes when not already added
+  delegate_to: "{{ item }}"
+  command: "{{ custom_k8s_cluster_docker_commmand_base }} --token {{ clusterregistrationtoken }} --worker"
+  when:
+    - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + "']") | length) == 0
+  with_items:
+    - "{{ groups[custom_k8s_cluster_group_inventory_name + '_worker'] }}"
+

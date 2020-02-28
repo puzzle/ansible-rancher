@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+ansible = ">2.9,<2.10"
+openshift = "*"
+jmespath = "*"
+
+[dev-packages]
+pylint = "<2.0.0"

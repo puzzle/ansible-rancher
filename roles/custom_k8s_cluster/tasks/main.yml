@@ -1,0 +1,10 @@
+---
+
+- name: Create or get Cluster
+  delegate_to: localhost
+  import_tasks: cluster.yml
+
+
+- name: Nodes
+  delegate_to: localhost
+  import_tasks: nodes.yml

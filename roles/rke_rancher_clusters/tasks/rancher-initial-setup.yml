@@ -1,0 +1,60 @@
+---
+
+- name: Get Login Token
+  uri:
+    url: "https://{{ rancher_hostname }}/v3-public/localProviders/local?action=login"
+    return_content: yes
+    body: "{ 'username': 'admin', 'password': '{{ rancher_admin_initial_password }}'}"
+    body_format: json
+    method: POST
+    status_code: 201
+    validate_certs: no
+  register: json_response
+
+- name: set Rancher Login Token
+  set_fact:
+    rancher_login_token: "{{ json_response.json.token }}"
+
+- name: Change admin Password
+  uri:
+    url: "https://{{ rancher_hostname }}/v3/users?action=changepassword"
+    return_content: yes
+    body: "{ 'currentPassword': '{{ rancher_admin_initial_password }}', 'newPassword': '{{ rancher_admin_password }}'}"
+    body_format: json
+    method: POST
+    status_code:
+    - 200
+    - 201
+    - 422
+    validate_certs: no
+    headers:
+      Authorization: "Bearer {{ rancher_login_token }}"
+
+- name: Create API Key
+  uri:
+    url: "https://{{ rancher_hostname }}/v3/token"
+    return_content: yes
+    body: "{'description': 'ansible_automation'}"
+    body_format: json
+    method: POST
+    status_code: 201
+    validate_certs: no
+    headers:
+      Authorization: "Bearer {{ rancher_login_token }}"
+  register: json_response
+
+- name: set Rancher API
+  set_fact:
+    rancher_api_token: "{{ json_response.json.token }}"
+
+- name: Change server-url
+  uri:
+    url: "https://{{ rancher_hostname }}/v3/settings/server-url"
+    return_content: yes
+    body: "{ 'name': 'server-url', 'server-url': '{{ rancher_hostname }}'}"
+    body_format: json
+    method: PUT
+    status_code: 201
+    validate_certs: no
+    headers:
+      Authorization: "Bearer {{ rancher_api_token }}"

@@ -1,0 +1,4 @@
+---
+- import_playbook: rancher_k8s_node.yml
+- import_playbook: rke_rancher_cluster.yml
+- import_playbook: custom_k8s_cluster.yml

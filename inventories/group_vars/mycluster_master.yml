@@ -1,0 +1,3 @@
+k8s_roles:
+- control_plane
+- etcd

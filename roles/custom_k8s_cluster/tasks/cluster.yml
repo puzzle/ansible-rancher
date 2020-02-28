@@ -1,0 +1,125 @@
+---
+- name: Get all Cluster from Rancher Control Plane
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusters"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+  register: rancher_cluster
+  check_mode: no
+
+- name: Set Fact for current cluster
+  delegate_to: localhost
+  set_fact:
+    cluster: "{{ rancher_cluster | json_query(\"json.data[?name == '\" + custom_k8s_cluster_name + \"']\") }}"
+  check_mode: no
+
+- name: Cluster does not exist, create new Cluster
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusters"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+    body: "{{ lookup('template','cluster.json.j2') | regex_replace('\n',' ') }}"
+    body_format: json
+    status_code: 201
+    method: POST
+  register: cluster_new
+  when:
+    - (cluster | length) == 0
+
+- name: Set fact if existing cluster
+  set_fact:
+    cluster: "{{ cluster[0] }}"
+  when:
+    - (cluster | length) > 0
+
+- name: Set fact if new cluster
+  set_fact:
+    cluster: "{{ cluster_new.json }}"
+  when:
+    - cluster_new is not skipped
+    - (cluster | length) == 0
+
+- name: Get Cluster Registration Token
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusterregistrationtoken?id={{ cluster.id }}"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+  register: clusterregistrationtoken
+  check_mode: no
+
+- name: Filter for correct clusterRegistrationToken
+  set_fact:
+    clusterregistrationtoken: "{{ clusterregistrationtoken | json_query(\"json.data[?clusterId == '\" + cluster.id + \"']\") }}"
+
+- name: Create cluster registration token when not already exists
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusterregistrationtoken"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+    body:
+      type: "clusterRegistrationToken"
+      clusterId: "{{ cluster.id }}"
+    body_format: json
+    status_code: 201
+    method: POST
+  register: newclusterRegistrationToken
+  when:
+    - ( clusterregistrationtoken | length ) == 0
+
+- name: Set cluster registration token if new token
+  set_fact:
+    clusterregistrationtoken: "{{ newclusterRegistrationToken.json.token }}"
+  when:
+    - newclusterRegistrationToken is not skipped
+
+- name: Set cluster registration token if existing token
+  set_fact:
+    clusterregistrationtoken: "{{ clusterregistrationtoken[0].token }}"
+  when:
+    - newclusterRegistrationToken is skipped
+    - ( clusterregistrationtoken | length ) > 0
+
+- name: Cluster registration token
+  debug:
+    msg: "{{ clusterregistrationtoken }}"
+
+- name: Get KubeConfig from Rancher Control Plane
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusters/{{ cluster.id }}?action=generateKubeconfig"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+    body_format: json
+    status_code: 200
+    method: POST
+  register: kubeconfig
+
+- name: Create local download directory
+  delegate_to: localhost
+  file:
+    path: "./custom_k8s_cluster"
+    state: directory
+    mode: 0755
+  run_once: true
+
+- name: Set KubeConfig filename
+  set_fact:
+    kubeconfigfile: "./custom_k8s_cluster/{{ cluster.id }}"
+  when:
+    - kubeconfig is not skipped
+
+- name: Store KubeConfig
+  copy:
+    content: "{{ kubeconfig.json.config }}"
+    dest: "{{ kubeconfigfile }}"
+  when:
+    - kubeconfig is not skipped
