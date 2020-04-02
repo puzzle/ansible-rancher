@@ -1,0 +1,33 @@
+- name: Cleanup Nodes
+  hosts: all
+  tasks:
+    - name: Stop Docker Container
+      shell:
+        cmd: "docker rm -f $(docker ps -qa)"
+      ignore_errors: True
+    - name: Remove Docker Volumes
+      shell:
+        cmd: "docker volume rm $(docker volume ls -q)"
+      ignore_errors: True
+    - name: Remove Directories and Files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/ceph
+        - /etc/cni
+        - /etc/kubernetes
+        - /opt/cni
+        - /opt/rke
+        - /run/secrets/kubernetes.io
+        - /run/calico
+        - /run/flannel
+        - /var/lib/calico
+        - /var/lib/etcd
+        - /var/lib/cni
+        - /var/lib/kubelet
+        - /var/lib/rancher/rke/log
+        - /var/log/containers
+        - /var/log/pods
+        - /var/log/pods
+        - /var/run/calico 
