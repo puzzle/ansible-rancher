@@ -38,6 +38,24 @@
   when:
   - not certmanager_enabled
 
+- name: Create tls secret when not using Let's Encrypt
+  k8s:
+    kubeconfig: "{{ rke_cluster_kube_config }}"
+    validate_certs: no # Certificate might not yet be deployed
+    state: present
+    definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: tls-rancher-ingress
+            namespace: cattle-system
+          data:
+            ca.crt: ""
+            tls.crt: "{{ rke_rancher_tls_crt }}"
+            tls.key: "{{ rke_rancher_tls_key }}"
+          type: kubernetes.io/tls
+  when:
+  - not certmanager_enabled
 
 - name: Wait for Rancher Deployment to be ready
   command: "{{ kubectl_binary }} -n cattle-system --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/rancher"

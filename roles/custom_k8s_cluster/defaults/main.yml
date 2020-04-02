@@ -17,12 +17,12 @@ custom_k8s_clusters_default_psp: restricted
 # Enable Network Segregation between Projects
 custom_k8s_cluster_enable_network_policy: true
 # Kubernetes Version
-custom_k8s_cluster_kubernetes_version: v1.17.2-rancher1-2
+custom_k8s_cluster_kubernetes_version: v1.17.4-rancher1-2
 # Ingress Provider (none, nginx)
 custom_k8s_clusters_ingress_provider: none
 
 # Rancher Agent to be used
-custom_k8s_cluster_agent_version: v2.3.5
+custom_k8s_cluster_agent_version: v2.3.6
 
 # Base command for the Ranger Agent
 custom_k8s_cluster_docker_commmand_base: "docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:{{ custom_k8s_cluster_agent_version}} --server https://{{ custom_k8s_cluster_rancher_host }}"
