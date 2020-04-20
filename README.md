@@ -4,7 +4,7 @@
 Feel free to contribute. I'm happy to assist.
 
 These Ansible playbook and roles can be used to:
-* create a Rancher Control Plane using [rke]() and [helm]()
+* create a [Rancher Control Plane](https://rancher.com/) using [rke](https://github.com/rancher/rke) and [helm](https://helm.sh/)
 * add a [custom kubernetes cluster] to an existing Rancher Control Plane
 
 ## Inventory
