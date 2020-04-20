@@ -3,7 +3,6 @@
 - name: Create namespace for IP failover objects
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
-    validate_certs: no # Certificate might not yet be deployed
     state: present
     api_version: v1
     kind: Namespace
@@ -14,7 +13,6 @@
 - name: Create IPv4 failover DaemonSet
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
-    validate_certs: no # Certificate might not yet be deployed
     state: present
     definition: "{{ lookup('template', 'ds_faiilover.yml.j2') }}"
   with_items:
@@ -23,13 +21,3 @@
     cluster: "{{ groups['rke_' + inventory_hostname] }}"
     unicast_peers: "{% for node in cluster %}''{{ hostvars[node]['ansible_eth0']['ipv4']['address'] }}'',{% endfor %}"
 
-- name: Create namespace for Rancher Control Plane
-  k8s:
-    kubeconfig: "{{ rke_cluster_kube_config }}"
-    validate_certs: no # Certificate might not yet be deployed
-    state: present
-    api_version: v1
-    kind: Namespace
-    name: cattle-system
-  vars:
-    cluster: "{{ groups['rke_' + inventory_hostname] }}"

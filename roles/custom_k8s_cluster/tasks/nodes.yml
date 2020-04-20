@@ -13,18 +13,12 @@
   debug:
     msg: "{{ cluster_nodes | json_query(\"json.data[*].hostname\") }}"
 
+- name: Add Nodes when not already added
   delegate_to: "{{ item }}"
-  command: "{{ custom_k8s_cluster_docker_commmand_base }} --token {{ clusterregistrationtoken }} --etcd --controlplane"
+  command: "{{ custom_k8s_cluster_docker_commmand_base }} --token {{ clusterregistrationtoken }} --node-name {{ hostvars[item]['ansible_facts']['hostname'] }}.{{ hostvars[item]['ansible_facts']['domain'] }}{% for label in hostvars[item]['k8s_labels'] %} --label {{ label.name }}={{ label.value }}{% endfor %}{% for role in hostvars[item]['k8s_roles'] %} --{{ role }}{% endfor %}"
   when:
-    - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + "']") | length) == 0
+    - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + "." + hostvars[item]['ansible_facts']['domain'] +"']") | length) == 0
   with_items:
-    - "{{ groups[custom_k8s_cluster_group_inventory_name + '_master'] }}"
-
-- name: Add Worker Nodes when not already added
-  delegate_to: "{{ item }}"
-  command: "{{ custom_k8s_cluster_docker_commmand_base }} --token {{ clusterregistrationtoken }} --worker"
-  when:
-    - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + "']") | length) == 0
-  with_items:
-    - "{{ groups[custom_k8s_cluster_group_inventory_name + '_worker'] }}"
+    - "{{ groups[custom_k8s_cluster_group_inventory_name ] }}"
+  ignore_errors: yes
 

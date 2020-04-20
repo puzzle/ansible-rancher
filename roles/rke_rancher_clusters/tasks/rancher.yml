@@ -1,4 +1,25 @@
 ---
+- name: Create namespace for Rancher Control Plane
+  k8s:
+    kubeconfig: "{{ rke_cluster_kube_config }}"
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: cattle-system
+  vars:
+    cluster: "{{ groups['rke_' + inventory_hostname] }}"
+
+- name: Create namespace for cert-manager
+  k8s:
+    kubeconfig: "{{ rke_cluster_kube_config }}"
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: cert-manager
+  vars:
+    cluster: "{{ groups['rke_' + inventory_hostname] }}"
+  when:
+  - certmanager_enabled
 
 - name: Add Rancher Repo to Helm
   command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ rancher_repo }} {{ rancher_repo_url }}"
@@ -14,14 +35,33 @@
   command: "{{ helm_binary }} repo update --kubeconfig {{ rke_cluster_kube_config }}"
   changed_when: false
 
+- name: Install CRD's for CertManager
+  command: "{{ kubectl_binary }} --kubeconfig {{ rke_cluster_kube_config }} apply --validate=false -f {{ certmanager_crd_url }}"
+  changed_when: false
+  ignore_errors: yes
+  when:
+  - certmanager_enabled
+
 - name: Install Cert-Manager
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace kube-system --version {{ rancher_certmanager_version }} cert-manager {{ jetstack_repo }}/cert-manager"
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cert-manager --version {{ rancher_certmanager_version }} cert-manager {{ jetstack_repo }}/cert-manager"
   changed_when: false
   when:
   - certmanager_enabled
 
 - name: Wait for certmanager to be ready
-  command: "{{ kubectl_binary }} -n kube-system --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager"
+  command: "{{ kubectl_binary }} -n cert-manager --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Wait for certmanager cainjector to be ready
+  command: "{{ kubectl_binary }} -n cert-manager --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager-cainjector"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Wait for certmanager webhook to be ready
+  command: "{{ kubectl_binary }} -n cert-manager --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager-webhook"
   changed_when: false
   when:
   - certmanager_enabled
@@ -41,7 +81,6 @@
 - name: Create tls secret when not using Let's Encrypt
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
-    validate_certs: no # Certificate might not yet be deployed
     state: present
     definition:
           apiVersion: v1

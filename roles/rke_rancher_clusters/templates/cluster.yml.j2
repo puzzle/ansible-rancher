@@ -3,7 +3,7 @@ nodes:
   - address: {{ hostvars[node]['ansible_' + rke_network_interface]['ipv4']['address'] }}
     internal_address: {{ hostvars[node]['ansible_' + rke_network_interface]['ipv4']['address'] }}
     user: {{ rke_ssh_user }}
-    role: [controlplane,worker,etcd]
+    role: [{% for role in hostvars[node]['k8s_roles'] %}{{ role }},{% endfor %}]
 
 {% endfor %}
 

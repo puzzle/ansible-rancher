@@ -19,7 +19,9 @@
   uri:
     url: "https://{{ rancher_hostname }}/v3/users?action=changepassword"
     return_content: yes
-    body: "{ 'currentPassword': '{{ rancher_admin_initial_password }}', 'newPassword': '{{ rancher_admin_password }}'}"
+    body: 
+      currentPassword: "{{ rancher_admin_initial_password }}"
+      newPassword: "{{ rancher_admin_password }}"
     body_format: json
     method: POST
     status_code:
@@ -34,10 +36,12 @@
   uri:
     url: "https://{{ rancher_hostname }}/v3/token"
     return_content: yes
-    body: "{'description': 'ansible_automation'}"
+    body:
+      description: ansible_automation
     body_format: json
     method: POST
-    status_code: 201
+    status_code: 
+    - 201
     validate_certs: no
     headers:
       Authorization: "Bearer {{ rancher_login_token }}"
@@ -51,10 +55,26 @@
   uri:
     url: "https://{{ rancher_hostname }}/v3/settings/server-url"
     return_content: yes
-    body: "{ 'name': 'server-url', 'server-url': '{{ rancher_hostname }}'}"
+    body: 
+      value: "{{ rancher_hostname }}"
     body_format: json
     method: PUT
-    status_code: 201
+    status_code:
+     - 200
+    validate_certs: no
+    headers:
+      Authorization: "Bearer {{ rancher_api_token }}"
+
+- name: Telemetroy opt-in/out
+  uri:
+    url: "https://{{ rancher_hostname }}/v3/settings/telemetry-opt"
+    return_content: yes
+    body: 
+      value: "{{ rancher_telemetry }}"
+    body_format: json
+    method: PUT
+    status_code:
+     - 200
     validate_certs: no
     headers:
       Authorization: "Bearer {{ rancher_api_token }}"

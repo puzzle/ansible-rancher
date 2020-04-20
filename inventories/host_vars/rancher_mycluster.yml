@@ -1,3 +1,2 @@
 custom_k8s_cluster_api_key: "" # Create a new token on your Rancher Control Plane
 custom_k8s_cluster_rancher_host: "" # URL of your Rancher control Plane
-custom_k8s_cluster_verify_ssl: no # In case when no valid cert is yet deployed (when not manually deploying)

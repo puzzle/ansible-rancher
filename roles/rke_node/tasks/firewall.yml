@@ -38,7 +38,7 @@
     - 30000-32767/tcp
     - 30000-32767/udp
   when:
-    - "'control_plane' in k8s_roles"
+    - "'controlplane' in k8s_roles"
 
 - name: Open firewall for Nodes with role worker
   firewalld:
@@ -60,7 +60,7 @@
   when:
     - "'worker' in k8s_roles"
 
-- name: Open vrrp
+- name: Open vrrp for keepalived
   firewalld:
     rich_rule: rule protocol value="vrrp" accept
     permanent: yes

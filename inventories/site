@@ -18,15 +18,12 @@ mycluster_master
 mycluster_worker
 
 [mycluster_master]
-master01 
-master02
-master03
+master01
 
 [mycluster_worker]
 worker01
 
-
 [rke_cluster_rancher]
-ranchertest01
+rancher01
 rancher02
 rancher03

@@ -1,0 +1,10 @@
+/.cache
+*.retry
+.vscode
+
+# Files downloaded or created during Rancher Plays
+plays/helm
+plays/kubectl-*
+plays/rke-*
+plays/linux-amd64/*
+plays/custom_k8s_cluster/*

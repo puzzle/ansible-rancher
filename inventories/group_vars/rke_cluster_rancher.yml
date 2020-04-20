@@ -1,4 +1,4 @@
 k8s_roles:
-- control_plane
+- controlplane
 - etcd
 - worker
