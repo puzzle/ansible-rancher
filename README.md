@@ -1,11 +1,9 @@
-# Ansible Playbook and Roles for Rancher
+# Ansible Playbooks and Roles for Rancher
 
 
 These Ansible playbook and roles can be used to:
 * create a Rancher Control Plane using [rke]() and [helm]()
 * add a [custom kubernetes cluster] to an existing Rancher Control Plane
-
-
 
 ## Inventory
 
@@ -63,19 +61,34 @@ Make sure to set at least the following vars:
 
 ## Playbooks
 
+### site.yaml
+
+Playbook to apply `docker`, `rke_node`, `rke_rancher_clusters` & `custom_rk8s_cluster`. Check [plays/prepare_k8s_nodes.yaml](./plays/prepare_k8s_nodes.yaml), [plays/deploy_rancher.yaml](./plays/deploy_rancher.yaml) & [plays/deploy_k8s_cluster.yaml](./plays/deploy_k8s_cluster.yaml) for details.
+
+### cleanup_k8snode.yaml
+
+With this playbook to can cleanup a node which was already added to a kubernetes cluster. Based on https://rancher.com/docs/rancher/v2.x/en/cluster-admin/cleaning-cluster-nodes/
 
 ## Roles
 
+### Docker
 
+Simple role to install Docker. Check [roles/docker/README.md](./roles/docker/README.md) for more details.
 
+### rke_node
 
- ## Dependencies
+Role to prepare a vm which then can be used as a node in a Rancher Control Plane or a custom Kubernetes Cluster. The role currently only configures firewalld depending on the `k8s_role` the node has. Based on https://rancher.com/docs/rancher/v2.x/en/installation/options/firewall/
 
+### rke_rancher_clusters
 
-* none
+Role to deploy a Rancher Control Plane with `rke` and `helm`. Check [roles/rke_rancher_clusters/README.md](./roles/rke_rancher_clusters/README.md) for more details.
+
+### custom_rk8s_cluster
+
+Role to create a custom kubernetes cluster on a Rancher Control Plane and add nodes to the cluster. Check [roles/custom_k8s_cluster/README.md](./roles/custom_k8s_cluster/README.md) for more details.
+
 
 ## License
-
 
 GPLv3
 
