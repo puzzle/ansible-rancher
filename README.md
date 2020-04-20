@@ -1,5 +1,7 @@
 # Ansible Playbooks and Roles for Rancher
 
+**Disclaimer!**: We use this as a base for our own and customer setup at puzzle. Heavy work in progress and a lot of things that can be improved.
+Feel free to contribute. I'm happy to assist.
 
 These Ansible playbook and roles can be used to:
 * create a Rancher Control Plane using [rke]() and [helm]()
