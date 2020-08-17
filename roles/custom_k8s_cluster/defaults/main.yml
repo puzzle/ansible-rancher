@@ -4,7 +4,7 @@ custom_k8s_cluster_api_key: ""
 custom_k8s_cluster_rancher_host: ""
 custom_k8s_cluster_rancher_api: "https://{{ custom_k8s_cluster_rancher_host }}/v3"
 custom_k8s_cluster_verify_ssl: yes
-custom_k8s_cluster_self_signed_certificate: true
+custom_k8s_cluster_self_signed_certificate: false
 custom_k8s_cluster_ca_checksum_param: "{{ '--ca-checksum' if custom_k8s_cluster_self_signed_certificate else '' }}"
 
 # Cluster Name, defaults to the inventory Name [custom_k8s_clusters] Ansible Group without the 'rancher_' Prefix
@@ -19,12 +19,12 @@ custom_k8s_clusters_default_psp: restricted
 # Enable Network Segregation between Projects
 custom_k8s_cluster_enable_network_policy: true
 # Kubernetes Version
-custom_k8s_cluster_kubernetes_version: v1.17.9-rancher1-1
+custom_k8s_cluster_kubernetes_version: v1.18.6-rancher1-1
 # Ingress Provider (none, nginx)
 custom_k8s_clusters_ingress_provider: none
 
 # Rancher Agent to be used
-custom_k8s_cluster_agent_version: v2.3.6
+custom_k8s_cluster_agent_version: v2.4.5
 
 # Base command for the Ranger Agent
 custom_k8s_cluster_docker_commmand_base: "docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:{{ custom_k8s_cluster_agent_version}} --server https://{{ custom_k8s_cluster_rancher_host }}"
