@@ -4,6 +4,8 @@ custom_k8s_cluster_api_key: ""
 custom_k8s_cluster_rancher_host: ""
 custom_k8s_cluster_rancher_api: "https://{{ custom_k8s_cluster_rancher_host }}/v3"
 custom_k8s_cluster_verify_ssl: yes
+custom_k8s_cluster_self_signed_certificate: true
+custom_k8s_cluster_ca_checksum_param: "{{ '--ca-checksum' if custom_k8s_cluster_self_signed_certificate else '' }}"
 
 # Cluster Name, defaults to the inventory Name [custom_k8s_clusters] Ansible Group without the 'rancher_' Prefix
 # As Cluster in Rancher cannot use _ in Names, we need to replace it with -
