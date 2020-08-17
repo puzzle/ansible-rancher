@@ -15,6 +15,15 @@
     cluster: "{{ rancher_cluster | json_query(\"json.data[?name == '\" + custom_k8s_cluster_name + \"']\") }}"
   check_mode: no
 
+- name: Set Fact for current cluster version, if it already exists
+  delegate_to: localhost
+  set_fact:
+    cluster_version: "{{ cluster[0]['rancherKubernetesEngineConfig']['kubernetesVersion'] }}"
+    cluster_id: "{{ cluster[0]['id'] }}"
+  check_mode: no
+  when:
+  - (cluster | length) > 0
+
 - name: Cluster does not exist, create new Cluster
   uri:
     url: "{{ custom_k8s_cluster_rancher_api }}/clusters"
@@ -30,6 +39,21 @@
   when:
     - (cluster | length) == 0
 
+- name: Cluster does exist, check if version upgrade is requested
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusters/{{ cluster_id }}"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+    body: "{{ lookup('template','cluster.json.j2') | regex_replace('\n',' ') }}"
+    body_format: json
+    status_code: 200
+    method: PUT
+  when:
+    - (cluster | length) > 0
+    - custom_k8s_cluster_kubernetes_version != cluster_version
+
 - name: Set fact if existing cluster
   set_fact:
     cluster: "{{ cluster[0] }}"
@@ -42,6 +66,10 @@
   when:
     - cluster_new is not skipped
     - (cluster | length) == 0
+
+- name: Print current cluster object
+  debug:
+     msg: "{{ cluster }}"
 
 - name: Get Cluster Registration Token
   uri:
