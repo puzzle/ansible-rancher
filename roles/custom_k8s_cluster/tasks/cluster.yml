@@ -65,7 +65,6 @@
     cluster: "{{ cluster_new.json }}"
   when:
     - cluster_new is not skipped
-    - (cluster | length) == 0
 
 - name: Print current cluster object
   debug:
@@ -118,6 +117,37 @@
 - name: Cluster registration token
   debug:
     msg: "{{ clusterregistrationtoken }}"
+
+- name: Get CA checksum
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusterregistrationtoken?id={{ cluster.id }}"
+    validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+  register: clusternodecommand
+  check_mode: no
+  when: custom_k8s_cluster_self_signed_certificate | bool == true
+
+- name: Filter for correct cluster clusterNodeCommand
+  set_fact:
+    clusternodecommand: "{{ clusternodecommand | json_query(\"json.data[?clusterId == '\" + cluster.id + \"']\") }}"
+  when: custom_k8s_cluster_self_signed_certificate | bool == true
+
+- name: Set cluster node command
+  set_fact:
+    clusternodecommand: "{{ clusternodecommand[0].nodeCommand }}"
+  when: custom_k8s_cluster_self_signed_certificate | bool == true
+
+- name: Parse cluster ca-checksum
+  set_fact:
+    clustercachecksum: "{{ clusternodecommand | regex_search(custom_k8s_cluster_ca_checksum_param | string + '(\\s+)' +'(.*)', '\\2') | first }}"
+  when: custom_k8s_cluster_self_signed_certificate | bool == true
+
+- name: Parsed ca-checksum from cluster
+  debug:
+    msg: "{{ clustercachecksum }}"
+  when: custom_k8s_cluster_self_signed_certificate | bool == true
 
 - name: Get KubeConfig from Rancher Control Plane
   uri:
