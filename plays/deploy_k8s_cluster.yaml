@@ -1,4 +1,9 @@
 ---
+- name: Gather facts from cluster nodes
+  hosts: rancher_k8s_nodes
+  tasks:
+    - setup:
+
 - name: playbook to install a custom k8s cluster with a Rancher Control Plane
   hosts: custom_k8s_clusters
   gather_facts: no
