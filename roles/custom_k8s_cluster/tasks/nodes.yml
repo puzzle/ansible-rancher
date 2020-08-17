@@ -9,16 +9,21 @@
   register: cluster_nodes
   check_mode: no
 
-- name: Show already added hosts
+- name: Show already added nodes
   debug:
     msg: "{{ cluster_nodes | json_query(\"json.data[*].hostname\") }}"
 
+- name: Show nodes which are going to be added
+  debug:
+    msg: "{{ hostvars[item]['ansible_facts']['hostname'] }}{{ '.' if hostvars[item]['ansible_facts']['domain'] else '' }}{{ hostvars[item]['ansible_facts']['domain'] }}"
+  with_items:
+    - "{{ groups[custom_k8s_cluster_group_inventory_name] }}"
+
 - name: Add Nodes when not already added
   delegate_to: "{{ item }}"
-  command: "{{ custom_k8s_cluster_docker_commmand_base }} --token {{ clusterregistrationtoken }} --node-name {{ hostvars[item]['ansible_facts']['hostname'] }}.{{ hostvars[item]['ansible_facts']['domain'] }}{% for label in hostvars[item]['k8s_labels'] %} --label {{ label.name }}={{ label.value }}{% endfor %}{% for role in hostvars[item]['k8s_roles'] %} --{{ role }}{% endfor %}"
+  command: "{{ custom_k8s_cluster_docker_commmand_base }} {{ custom_k8s_cluster_ca_checksum_param }} {{ clustercachecksum }} --token {{ clusterregistrationtoken }} --node-name {{ hostvars[item]['ansible_facts']['hostname'] }}{{ '.' if hostvars[item]['ansible_facts']['domain'] else '' }}{{ hostvars[item]['ansible_facts']['domain'] }}{% for label in hostvars[item]['k8s_labels'] %} --label {{ label.name }}={{ label.value }}{% endfor %}{% for role in hostvars[item]['k8s_roles'] %} --{{ role }}{% endfor %}"
   when:
     - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + "." + hostvars[item]['ansible_facts']['domain'] +"']") | length) == 0
   with_items:
-    - "{{ groups[custom_k8s_cluster_group_inventory_name ] }}"
+    - "{{ groups[custom_k8s_cluster_group_inventory_name] }}"
   ignore_errors: yes
-
