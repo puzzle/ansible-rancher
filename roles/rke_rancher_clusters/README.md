@@ -44,6 +44,7 @@ rancher_telemetry: out
 
 ## Due to https://bugzilla.redhat.com/show_bug.cgi?id=1527565
 rke_ssh_user: centos
+rke_ssh_agent_auth: true
 rke_network_interface: eth0
 
 
