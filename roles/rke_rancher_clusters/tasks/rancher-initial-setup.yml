@@ -11,7 +11,7 @@
     validate_certs: no
   register: json_response
 
-- name: set Rancher Login Token
+- name: Set Rancher Login Token
   set_fact:
     rancher_login_token: "{{ json_response.json.token }}"
 
@@ -47,7 +47,7 @@
       Authorization: "Bearer {{ rancher_login_token }}"
   register: json_response
 
-- name: set Rancher API
+- name: Set Rancher API
   set_fact:
     rancher_api_token: "{{ json_response.json.token }}"
 
@@ -65,7 +65,7 @@
     headers:
       Authorization: "Bearer {{ rancher_api_token }}"
 
-- name: Telemetroy opt-in/out
+- name: Telemetry opt-in/out
   uri:
     url: "https://{{ rancher_hostname }}/v3/settings/telemetry-opt"
     return_content: yes

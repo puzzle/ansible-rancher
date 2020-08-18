@@ -89,12 +89,28 @@
             name: tls-rancher-ingress
             namespace: cattle-system
           data:
-            ca.crt: ""
             tls.crt: "{{ rke_rancher_tls_crt }}"
             tls.key: "{{ rke_rancher_tls_key }}"
           type: kubernetes.io/tls
   when:
   - not certmanager_enabled
+
+- name: Create tls cacerts secret when not using Let's Encrypt and using self-signed Rancher TLS cert
+  k8s:
+    kubeconfig: "{{ rke_cluster_kube_config }}"
+    state: present
+    definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: tls-ca
+            namespace: cattle-system
+          data:
+            cacerts.pem: "{{ rke_rancher_tls_cacerts }}"
+          type: kubernetes.io/tls
+  when:
+  - not certmanager_enabled
+  - rke_rancher_tls_self_signed
 
 - name: Wait for Rancher Deployment to be ready
   command: "{{ kubectl_binary }} -n cattle-system --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/rancher"

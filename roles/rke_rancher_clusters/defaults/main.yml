@@ -41,3 +41,8 @@ certmanager_crd_url: "https://github.com/jetstack/cert-manager/releases/download
 
 rke_rancher_tls_crt: ""
 rke_rancher_tls_key: ""
+rke_rancher_tls_cacerts: ""
+# rke_rancher_tls_self_signed needs to be true if the Rancher TLS cert is self-signed, then also the
+# full CA chain needs to be provided via rke_rancher_tls_cacerts. 
+# See https://rancher.com/blog/2020/transport-layer-security-p2 for more information
+rke_rancher_tls_self_signed: false
