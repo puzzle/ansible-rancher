@@ -17,7 +17,7 @@ Role Variables
 Most of the vars should be quite self exlanatory.
 
 ```yaml
-
+---
 docker_packages:
   - git
   - yum-utils
@@ -25,6 +25,8 @@ docker_packages:
   - lvm2
 docker_pkg_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
 Dependencies
+
+docker_package: docker-ce
 ------------
 
 None

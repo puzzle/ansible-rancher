@@ -33,7 +33,7 @@ rancher03
 ```
 
 Make sure to set at least the following vars:
-* For the `cluster_rancher` special host, you have to set `rancher_hostname` and `rancher_admin_password`. Check [inventories/host_vars/cluster_rancher.yml](./inventories/host_vars/cluster_rancher.yml) and [roles/rke_rancher_clusters/defaults/main.yaml](./roles/rke_rancher_clusters/defaults/main.yaml]) for more details.
+* For the `cluster_rancher` special host, you have to set `rancher_hostname` and `rancher_admin_password`. Check [inventories/host_vars/cluster_rancher.yml](./inventories/host_vars/cluster_rancher.yml) and [roles/rke_rancher_clusters/defaults/main.yml](./roles/rke_rancher_clusters/defaults/main.yml]) for more details.
 * Set the `k8s_roles` each of the member should have (for a Rancher Control Plane this is normally `controlplane`, `etcd`, `worker`). See [inventories/group_vars/rke_cluster_rancher.yml](./inventories/group_vars/rke_cluster_rancher.yml) as an example.
 
 
@@ -58,16 +58,16 @@ worker01
 ```
 
 Make sure to set at least the following vars:
-* For the `ranchr_mycluster` special host you have to set at least the `custom_k8s_cluster_api_key` & `custom_k8s_cluster_rancher_host` variable. Check [roles/custom_k8s_cluster/defaults/main.yaml](./roles/custom_k8s_cluster/defaults/main.yaml]) for more details and variables.
+* For the `ranchr_mycluster` special host you have to set at least the `custom_k8s_cluster_api_key` & `custom_k8s_cluster_rancher_host` variable. Check [roles/custom_k8s_cluster/defaults/main.yml](./roles/custom_k8s_cluster/defaults/main.yml]) for more details and variables.
 * Set the `k8s_roles` each member should have. See [inventories/group_vars/mycluster_master.yml](./inventories/group_vars/mycluster_master.yml) and [inventories/group_vars/mycluster_worker.yml](./inventories/group_vars/mycluster_worker.yml) as an example.
 
 ## Playbooks
 
-### site.yaml
+### site.yml
 
-Playbook to apply `docker`, `rke_node`, `rke_rancher_clusters` & `custom_rk8s_cluster`. Check [plays/prepare_k8s_nodes.yaml](./plays/prepare_k8s_nodes.yaml), [plays/deploy_rancher.yaml](./plays/deploy_rancher.yaml) & [plays/deploy_k8s_cluster.yaml](./plays/deploy_k8s_cluster.yaml) for details.
+Playbook to apply `docker`, `rke_node`, `rke_rancher_clusters` & `custom_rk8s_cluster`. Check [plays/prepare_k8s_nodes.yml](./plays/prepare_k8s_nodes.yml), [plays/deploy_rancher.yml](./plays/deploy_rancher.yml) & [plays/deploy_k8s_cluster.yml](./plays/deploy_k8s_cluster.yml) for details.
 
-### cleanup_k8snode.yaml
+### cleanup_k8snode.yml
 
 With this playbook to can cleanup a node which was already added to a kubernetes cluster. Based on https://rancher.com/docs/rancher/v2.x/en/cluster-admin/cleaning-cluster-nodes/
 
