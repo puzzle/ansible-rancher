@@ -12,7 +12,13 @@ Only uses python and ansible.
 Role Variables
 --------------
 
-None
+```yaml
+---
+k8s_roles:
+- controlplane
+- etcd
+- worker
+```
 
 Dependencies
 ------------
