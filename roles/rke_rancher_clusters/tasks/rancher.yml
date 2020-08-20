@@ -66,18 +66,6 @@
   when:
   - certmanager_enabled
 
-- name: Install Rancher with Let's Encrypt
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=letsEncrypt --set letsEncrypt.email={{ rancher_letsencrypt_email }} --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
-  changed_when: false
-  when:
-  - certmanager_enabled
-
-- name: Install Rancher without Let's Encrypt
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
-  changed_when: false
-  when:
-  - not certmanager_enabled
-
 - name: Create tls secret when not using Let's Encrypt
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
@@ -107,6 +95,26 @@
         namespace: cattle-system
       data:
         cacerts.pem: "{{ rke_rancher_tls_cacerts }}"
+  when:
+  - not certmanager_enabled
+  - rke_rancher_tls_self_signed
+
+- name: Install Rancher with Let's Encrypt
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=letsEncrypt --set letsEncrypt.email={{ rancher_letsencrypt_email }} --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  changed_when: false
+  when:
+  - certmanager_enabled
+
+- name: Install Rancher with officially signed certificates
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  changed_when: false
+  when:
+  - not certmanager_enabled
+  - not rke_rancher_tls_self_signed
+
+- name: Install Rancher with self-signed certificates
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --set privateCA=true --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  changed_when: false
   when:
   - not certmanager_enabled
   - rke_rancher_tls_self_signed
