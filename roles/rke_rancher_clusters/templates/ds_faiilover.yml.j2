@@ -20,10 +20,8 @@ spec:
     spec:
       containers:
       - env:
-        - name: API_TOKEN
-          value: {{ cloudscale_api_token }}
         - name: KEEPALIVED_NOTIFY
-          value: /tmp/failoverscripts/notify.sh
+          value: /container/service/keepalived/assets/notify.sh
         - name: KEEPALIVED_ROUTER_ID
           value: "{{ item.router_id }}"
         - name: KEEPALIVED_UNICAST_PEERS
@@ -32,8 +30,8 @@ spec:
           value: '#PYTHON2BASH:[''{{ item.vip }}'']'
         - name: MASTER_HOST
           value: {{ item.master }}
-        - name: SERVER_IDS
-          value: '#PYTHON2BASH:[{{ server_ids }}]'
+        - name: KEEPALIVED_PASSWORD
+          value: {{ item.password }}
         image: puzzle/keepalived:2.0.19
         imagePullPolicy: Always
         livenessProbe:

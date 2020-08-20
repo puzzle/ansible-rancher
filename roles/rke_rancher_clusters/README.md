@@ -35,7 +35,11 @@ rancher_repo_url: "https://releases.rancher.com/server-charts/stable"
 kubernetes_version: v1.18.6-rancher1-1
 rancher_version: v2.4.5
 
-rancher_failover_ip: []
+rancher_failover_ip:
+- vip: 192.168.121.254
+  router_id: 50
+  master: rancher01
+  password: "my-top-secret-password-here"
 
 rancher_hostname: ""
 rancher_admin_password: ""
