@@ -51,6 +51,11 @@
   set_fact:
     rancher_api_token: "{{ json_response.json.token }}"
 
+- name: Add RANCHER_TOKEN_HOLDER dummy host
+  add_host:
+    name: "RANCHER_TOKEN_HOLDER"
+    api_token: "{{ rancher_api_token }}"
+
 - name: Change server-url
   uri:
     url: "https://{{ rancher_hostname }}/v3/settings/server-url"

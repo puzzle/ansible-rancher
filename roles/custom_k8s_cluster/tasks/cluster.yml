@@ -1,4 +1,13 @@
 ---
+- name: Check if api_token is already present (rke_rancher_clusters was run before)
+  set_fact:
+    custom_k8s_cluster_api_key: "{{ hostvars['RANCHER_TOKEN_HOLDER']['api_token'] }}"
+  when:
+  - hostvars['RANCHER_TOKEN_HOLDER'] is defined
+  - hostvars['RANCHER_TOKEN_HOLDER']['api_token'] is defined
+  - (hostvars['RANCHER_TOKEN_HOLDER']['api_token'] | length) > 0
+  - (custom_k8s_cluster_api_key | length) == 0
+
 - name: Get all Cluster from Rancher Control Plane
   uri:
     url: "{{ custom_k8s_cluster_rancher_api }}/clusters"
@@ -65,10 +74,6 @@
     cluster: "{{ cluster_new.json }}"
   when:
     - cluster_new is not skipped
-
-- name: Print current cluster object
-  debug:
-     msg: "{{ cluster }}"
 
 - name: Get Cluster Registration Token
   uri:
