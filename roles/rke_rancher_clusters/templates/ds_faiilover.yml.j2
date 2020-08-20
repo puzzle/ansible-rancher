@@ -34,15 +34,6 @@ spec:
           value: {{ item.password }}
         image: puzzle/keepalived:2.0.19
         imagePullPolicy: Always
-        livenessProbe:
-          exec:
-            command:
-            - /tmp/failoverscripts/check.py
-          failureThreshold: 3
-          initialDelaySeconds: 10
-          periodSeconds: 30
-          successThreshold: 1
-          timeoutSeconds: 2
         name: ipfailover1
         resources: {}
         securityContext:
@@ -56,13 +47,4 @@ spec:
           runAsNonRoot: false
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /tmp/failoverscripts/
-          name: config
       hostNetwork: true
-      volumes:
-      - configMap:
-          defaultMode: 511
-          name: keepalived-failover
-          optional: false
-        name: config
