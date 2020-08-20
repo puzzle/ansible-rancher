@@ -33,7 +33,7 @@ rancher03
 ```
 
 Make sure to set at least the following vars:
-* For the `cluster_rancher` special host, you have to set `rancher_hostname` and `rancher_admin_password`. Check [inventories/host_vars/cluster_rancher.yml](./inventories/host_vars/cluster_rancher.yml) and [roles/rke_rancher_clusters/defaults/main.yml](./roles/rke_rancher_clusters/defaults/main.yml]) for more details.
+* For the `cluster_rancher` special host, you have to set `rancher_hostname`, `rancher_admin_password` and `rancher_failover_ip` with its sub-configurations (see [roles/rke_rancher_clusters/README.md](roles/rke_rancher_clusters/README.md) for more information). Check [inventories/host_vars/cluster_rancher.yml](./inventories/host_vars/cluster_rancher.yml) and [roles/rke_rancher_clusters/defaults/main.yml](./roles/rke_rancher_clusters/defaults/main.yml]) for more details.
 * Set the `k8s_roles` each of the member should have (for a Rancher Control Plane this is normally `controlplane`, `etcd`, `worker`). See [inventories/group_vars/rke_cluster_rancher.yml](./inventories/group_vars/rke_cluster_rancher.yml) as an example.
 
 
