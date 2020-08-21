@@ -32,7 +32,7 @@ spec:
           value: {{ item.master }}
         - name: KEEPALIVED_PASSWORD
           value: {{ item.password }}
-        image: puzzle/keepalived:2.0.19
+        image: {{ keepalived_image_version }}
         imagePullPolicy: Always
         name: ipfailover1
         resources: {}

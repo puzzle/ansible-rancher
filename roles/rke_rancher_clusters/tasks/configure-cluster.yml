@@ -20,4 +20,5 @@
   vars:
     cluster: "{{ groups['rke_' + inventory_hostname] }}"
     unicast_peers: "{% for node in cluster %}''{{ hostvars[node]['ansible_eth0']['ipv4']['address'] }}'',{% endfor %}"
+    keepalived_image_version: "{{ keepalived_image_version }}"
 
