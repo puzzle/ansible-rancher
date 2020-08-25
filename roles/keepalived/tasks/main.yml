@@ -6,4 +6,4 @@
   tags:
     - keepalived_installation
   when:
-    - custom_k8s_cluster_keepalived_enabled
+    - keepalived_enabled

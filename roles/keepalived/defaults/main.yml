@@ -11,12 +11,13 @@ keepalived_private_only: false
 # and leave all "*_ipv6" configuration options down here empty.
 keepalived_ipv4_only: false
 # Specify a node selector labels if keepalived containers should only run on certain nodes
-# If left empty, the daemonset will deploy a replica per node. For example "vip_public" and "vip_private":
-keepalived_private_node_selector: "vip_private"
-keepalived_public_node_selector: "vip_public"
-# Specify a node toleration label if keepalived containers should be running on tainted certain nodes
+# If left empty, the daemonset will deploy a replica per node. For example "vip_public" and "vip_private".
+keepalived_private_node_selector: ""
+keepalived_public_node_selector: ""
+# Specify a node toleration label if keepalived containers should be running on tainted certain nodes.
+# For example "public_ingress".
 keepalived_private_node_toleration: ""
-keepalived_public_node_toleration: "public_ingress"
+keepalived_public_node_toleration: ""
 # Specify where the custom K8s cluster is running. Currently supported environments are:
 # - "local": Local keepalived setup
 # - "cloudscale": Keepalived setup with cloudscale floating IP
