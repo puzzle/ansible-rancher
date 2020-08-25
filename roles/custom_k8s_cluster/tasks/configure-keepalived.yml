@@ -1,0 +1,93 @@
+---
+
+- name: Wait until Cluster is ready and not in transitioning state
+  uri:
+    url: "{{ custom_k8s_cluster_rancher_api }}/clusters/{{ cluster.id }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ custom_k8s_cluster_api_key }}"
+  register: cluster
+  until: cluster.json.state == "active" and cluster.json.transitioning == "no"
+  retries: 30
+  delay: 60
+
+- name: Create Namespace for IP Failover objects
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: ipfailover
+
+- name: Create Role for privileged PSP for IP Failover
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    definition: "{{ lookup('file', 'psp:privileged.yml') }}"
+
+- name: Create RoleBinding for privileged PSP for IP Failover
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    definition: "{{ lookup('file', 'default:psp:privileged.yml') }}"
+
+- name: Create ConfigMap with check.py and/or notify.sh for IP Failover
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    definition: "{{ lookup('file', 'cm-{{ custom_k8s_cluster_keepalived_setup_env }}-notify.yml') }}"
+
+- name: Create IP Failover DaemonSets for Internal IP
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    definition: "{{ lookup('template', 'ds_failover.yml.j2') }}"
+  with_items:
+    - "{{ custom_k8s_cluster_keepalived_private_failover_ip }}"
+  vars:
+    nodes: "{{ groups[custom_rancher_cluster_group_inventory_name + '_master'] }}"
+    unicast_peers: "{% for node in nodes %}''{{ hostvars[node]['ansible_' + custom_k8s_cluster_keepalived_private_failover_track_interface_ip]['ipv4']['address'] }}'',{% endfor %}"
+    with_cloud_notify: "{{ 'True' if custom_k8s_cluster_keepalived_setup_env == 'cloudscale' else 'False' }}"
+    node_selector: "{{ custom_k8s_cluster_keepalived_private_node_selector }}"
+    node_toleration: "{{ custom_k8s_cluster_keepalived_private_node_toleration }}"
+    interface: "{{ custom_k8s_cluster_keepalived_private_failover_track_interface_ip }}"
+    track_interface: "{{ custom_k8s_cluster_keepalived_private_failover_track_interface_ip }}"
+
+- name: Create IP Failover DaemonSets for Public IP
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    definition: "{{ lookup('template', 'ds_failover.yml.j2') }}"
+  with_items:
+    - "{{ custom_k8s_cluster_keepalived_public_failover_track_interface_ip }}"
+  vars:
+    nodes: "{{ groups[custom_rancher_cluster_group_inventory_name + '_ingress'] }}"
+    unicast_peers: "{% for node in nodes %}''{{ hostvars[node]['ansible_' + custom_k8s_cluster_keepalived_public_failover_track_interface_ip]['ipv4']['address'] }}'',{% endfor %}"
+    server_ids: "{% for node in nodes %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
+    with_cloud_notify: "{{ 'True' if custom_k8s_cluster_keepalived_setup_env == 'cloudscale' else 'False' }}"
+    node_selector: "{{ custom_k8s_cluster_keepalived_public_node_selector }}"
+    node_toleration: "{{ custom_k8s_cluster_keepalived_public_node_toleration }}"
+    interface: "{{ custom_k8s_cluster_keepalived_public_failover_track_interface_ip }}"
+    track_interface: "{{ custom_k8s_cluster_keepalived_public_failover_track_interface_ip }}"
+  when:
+    - not custom_k8s_cluster_keepalived_private_only
+
+- name: Create IP Failover DaemonSets for Public IPv6
+  k8s:
+    kubeconfig: "{{ kubeconfigfile }}"
+    state: present
+    definition: "{{ lookup('template', 'ds_failover.yml.j2') }}"
+  with_items:
+    - "{{ custom_k8s_cluster_keepalived_public_failover_track_interface_ipv6 }}"
+  vars:
+    nodes: "{{ groups[custom_rancher_cluster_group_inventory_name + '_ingress'] }}"
+    unicast_peers: "{% for node in nodes %}''{{ hostvars[node]['ansible_default_ipv6']['address'] }}'',{% endfor %}"
+    server_ids: "{% for node in nodes %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
+    with_cloud_notify: "{{ 'True' if custom_k8s_cluster_keepalived_setup_env == 'cloudscale' else 'False' }}"
+    node_selector: "{{ custom_k8s_cluster_keepalived_public_node_selector }}"
+    node_toleration: "{{ custom_k8s_cluster_keepalived_public_node_toleration }}"
+    interface: "{{ custom_k8s_cluster_keepalived_public_failover_track_interface_ipv6 }}"
+    track_interface: "{{ custom_k8s_cluster_keepalived_public_failover_track_interface_ipv6 }}"
+  when:
+    - not custom_k8s_cluster_keepalived_private_only
+    - not custom_k8s_cluster_keepalived_ipv4_only

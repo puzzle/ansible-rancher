@@ -35,12 +35,51 @@ rancher_repo_url: "https://releases.rancher.com/server-charts/stable"
 kubernetes_version: v1.18.6-rancher1-1
 rancher_version: v2.4.5
 
-keepalived_image_version: "puzzle/keepalived:latest"
-rancher_failover_ip:
-- vip: 192.168.121.254
-  router_id: 50
-  master: rancher01
-  password: "my-top-secret-password-here"
+# Custom K8s cluster vIP HA setup
+# Useful when you want built-in HA for your custom K8s cluster ingress controller without external LB
+rancher_cluster_keepalived_enabled: false
+# Specify if the keepalived setup should only use a private IP.
+# If so, set "rancher_cluster_keepalived_private_only" to "true"
+# and leave all "*_public_*" configuration options down here empty.
+rancher_cluster_keepalived_private_only: false
+# Specify if the keepalived setup should only use IPv4.
+# If so, set "rancher_cluster_keepalived_ipv4_only" to "true"
+# and leave all "*_ipv6" configuration options down here empty.
+rancher_cluster_keepalived_ipv4_only: false
+# Specify a node selector labels if keepalived containers should only run on certain nodes
+# If left empty, the daemonset will deploy a replica per node. For example "vip_public" and "vip_private":
+rancher_cluster_keepalived_private_node_selector: "vip_private"
+rancher_cluster_keepalived_public_node_selector: "vip_public"
+# Specify a node toleration label if keepalived containers should be running on tainted certain nodes
+rancher_cluster_keepalived_private_node_toleration: ""
+rancher_cluster_keepalived_public_node_toleration: "public_ingress"
+# Specify where the custom K8s cluster is running. Currently supported environments are:
+# - "local": Local keepalived setup
+# - "cloudscale": Keepalived setup with cloudscale floating IP
+rancher_cluster_keepalived_setup_env: "local"
+# If "rancher_cluster_keepalived_setup_env" is set to "cloudscale", a cloudscale API token needs to be provided.
+rancher_cluster_keepalived_cloudscale_api_token: "{{ cloudscale_api_token }}"
+# Keepalived service Docker image
+rancher_cluster_keepalived_image: "puzzle/keepalived:2.0.20"
+# Keepalived IP address configuration
+rancher_cluster_keepalived_private_failover_track_interface_ip: eth1
+rancher_cluster_keepalived_private_failover_ip:
+  - vip: "192.0.2.254"
+    router_id: 1
+    master: rancher01
+    password: my-top-secret-password1-here
+rancher_cluster_keepalived_public_failover_track_interface_ip: eth0
+rancher_cluster_keepalived_public_failover_ip:
+  - vip: "198.51.100.254"
+    router_id: 2
+    master: rancher01
+    password: my-top-secret-password2-here
+rancher_cluster_keepalived_public_failover_track_interface_ipv6: eth0
+rancher_cluster_keepalived_public_failover_ipv6:
+  - vip: "2001:db8::ffff"
+    router_id: 3
+    master: rancher01
+    password: my-top-secret-password3-here
 
 rancher_hostname: ""
 rancher_admin_password: ""
