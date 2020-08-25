@@ -14,12 +14,8 @@
 
 - name: Configure keepalived
   delegate_to: localhost
-  import_tasks: configure-keepalived.yml
-  tags:
-    - custom_k8s_clusters_keepalived_installation
-  when: 
-    - kubeconfig_result.stat.exists
-    - rancher_cluster_keepalived_enabled
+  include_role:
+    name: keepalived
 
 - name: Get Rancher Install Status for first time setup check
   delegate_to: localhost
