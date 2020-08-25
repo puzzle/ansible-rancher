@@ -9,6 +9,5 @@
   import_tasks: nodes.yml
 
 - name: Configure keepalived
-  delegate_to: localhost
   include_role:
-  name: keepalived
+    name: keepalived
