@@ -19,52 +19,52 @@
   vars:
     cluster: "{{ groups['rke_' + inventory_hostname] }}"
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Add Rancher Repo to Helm
-  command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ rancher_repo }} {{ rancher_repo_url }}"
+  command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ helm_rancher_repo }} {{ helm_rancher_repo_url }}"
   changed_when: false
 
 - name: Add Jetstack Cert-Manager Repo to Helm
-  command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ jetstack_repo }} {{ jetstack_repo_url }}"
+  command: "{{ helm_binary }} repo add --kubeconfig {{ rke_cluster_kube_config }} {{ helm_certmanager_jetstack_repo }} {{ helm_certmanager_jetstack_repo_url }}"
   changed_when: false
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Update Helm Repo
   command: "{{ helm_binary }} repo update --kubeconfig {{ rke_cluster_kube_config }}"
   changed_when: false
 
 - name: Install CRD's for CertManager
-  command: "{{ kubectl_binary }} --kubeconfig {{ rke_cluster_kube_config }} apply --validate=false -f {{ certmanager_crd_url }}"
+  command: "{{ kubectl_binary }} --kubeconfig {{ rke_cluster_kube_config }} apply --validate=false -f {{ rancher_certmanager_crd_url }}"
   changed_when: false
   ignore_errors: yes
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Install Cert-Manager
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cert-manager --version {{ rancher_certmanager_version }} cert-manager {{ jetstack_repo }}/cert-manager"
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cert-manager --version {{ helm_certmanager_version }} cert-manager {{ helm_certmanager_jetstack_repo }}/cert-manager"
   changed_when: false
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Wait for certmanager to be ready
   command: "{{ kubectl_binary }} -n cert-manager --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager"
   changed_when: false
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Wait for certmanager cainjector to be ready
   command: "{{ kubectl_binary }} -n cert-manager --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager-cainjector"
   changed_when: false
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Wait for certmanager webhook to be ready
   command: "{{ kubectl_binary }} -n cert-manager --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/cert-manager-webhook"
   changed_when: false
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Create tls secret when not using Let's Encrypt
   k8s:
@@ -77,11 +77,11 @@
         name: tls-rancher-ingress
         namespace: cattle-system
       data:
-        tls.crt: "{{ rke_rancher_tls_crt }}"
-        tls.key: "{{ rke_rancher_tls_key }}"
+        tls.crt: "{{ rancher_tls_crt }}"
+        tls.key: "{{ rancher_tls_key }}"
       type: kubernetes.io/tls
   when:
-  - not certmanager_enabled
+  - not rancher_certmanager_enabled
 
 - name: Create tls cacerts secret when not using Let's Encrypt and using self-signed Rancher TLS cert
   k8s:
@@ -94,30 +94,30 @@
         name: tls-ca
         namespace: cattle-system
       data:
-        cacerts.pem: "{{ rke_rancher_tls_cacerts }}"
+        cacerts.pem: "{{ rancher_tls_cacerts }}"
   when:
-  - not certmanager_enabled
-  - rke_rancher_tls_self_signed
+  - not rancher_certmanager_enabled
+  - rancher_tls_self_signed
 
 - name: Install Rancher with Let's Encrypt
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=letsEncrypt --set letsEncrypt.email={{ rancher_letsencrypt_email }} --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=letsEncrypt --set letsEncrypt.email={{ rancher_letsencrypt_email }} --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
   changed_when: false
   when:
-  - certmanager_enabled
+  - rancher_certmanager_enabled
 
 - name: Install Rancher with officially signed certificates
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
   changed_when: false
   when:
-  - not certmanager_enabled
-  - not rke_rancher_tls_self_signed
+  - not rancher_certmanager_enabled
+  - not rancher_tls_self_signed
 
 - name: Install Rancher with self-signed certificates
-  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --set privateCA=true --version {{ rancher_version }} rancher {{ rancher_repo }}/rancher"
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --set privateCA=true --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
   changed_when: false
   when:
-  - not certmanager_enabled
-  - rke_rancher_tls_self_signed
+  - not rancher_certmanager_enabled
+  - rancher_tls_self_signed
 
 - name: Wait for Rancher Deployment to be ready
   command: "{{ kubectl_binary }} -n cattle-system --kubeconfig {{ rke_cluster_kube_config }} rollout status deploy/rancher"
