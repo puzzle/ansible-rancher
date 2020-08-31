@@ -1,5 +1,19 @@
 ---
 
+- name: Wait until Cluster is ready and not in transitioning state
+  uri:
+    url: "{{ keepalived_deployment_rancher_api }}/clusters/{{ keepalived_deployment_rancher_cluster_id }}"
+    validate_certs: "{{ keepalived_deployment_rancher_api_verify_ssl }}"
+    return_content: yes
+    headers:
+      Authorization: "Bearer {{ keepalived_deployment_rancher_api_key }}"
+  register: cluster
+  until: cluster.json.state == "active" and cluster.json.transitioning == "no"
+  retries: 30
+  delay: 60
+  when:
+    - keepalived_deployment_on_custom_cluster
+
 - name: Create Namespace for IP Failover objects
   k8s:
     kubeconfig: "{{ kubeconfigfile }}"

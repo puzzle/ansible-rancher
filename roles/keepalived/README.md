@@ -41,6 +41,14 @@ keepalived_setup_env: "local"
 keepalived_cloudscale_api_token: "{{ cloudscale_api_token }}"
 # Keepalived service Docker image
 keepalived_image: "puzzle/keepalived:2.0.20"
+# Specify if keepalived daemonset deployment destination is on a custom K8s cluster.
+# If set to true, the keepalived role waits with its tasks until the destination cluster is ready and not in transitioning state
+keepalived_deployment_on_custom_cluster: false
+# If "keepalived_deployment_on_custom_cluster" is set to true the following Rancher API related variables ("keepalived_deployment_rancher_*") need to be set too.
+keepalived_deployment_rancher_api: "https://rancher.example.com/v3"
+keepalived_deployment_rancher_api_key: ""
+keepalived_deployment_rancher_api_verify_ssl: yes
+keepalived_deployment_rancher_cluster_id: ""
 # Keepalived IP address configuration
 keepalived_private_failover_track_interface_ip: eth0
 keepalived_private_failover_ip:
@@ -60,6 +68,18 @@ keepalived_public_failover_ipv6:
     router_id: 3
     master: rancher01
     password: my-top-secret-password3-here
+# Node groups to deploy keepalived on
+# Usually the default variable "keepalived_cluster_group_inventory_name" is replaces with "custom_k8s_cluster_group_inventory_name" or 
+# "rke_cluster_group_inventory_name" for example - depending from which other role this keepalived role is called.
+keepalived_cluster_group_inventory_name: "{{ inventory_hostname | regex_replace('rancher_') }}"
+# Node groups
+# Example: If you would like to split keepalived daemonsets to different host groups:
+#   - private IPv4: "{{ groups[keepalived_cluster_group_inventory_name + '_master'] }}"
+#   - public IPv4: "{{ groups[keepalived_cluster_group_inventory_name + '_ingress'] }}"
+#   - public IPv6: "{{ groups[keepalived_cluster_group_inventory_name + '_ingress'] }}"
+keepalived_private_node_group_ipv4: "{{ keepalived_cluster_group_inventory_name }}"
+keepalived_public_node_group_ipv4: "{{ keepalived_cluster_group_inventory_name }}"
+keepalived_public_node_group_ipv6: "{{ keepalived_cluster_group_inventory_name }}"
 ```
 
 Dependencies
