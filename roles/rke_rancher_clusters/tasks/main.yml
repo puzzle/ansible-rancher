@@ -12,10 +12,13 @@
   delegate_to: localhost
   import_tasks: rke-up.yml
 
-- name: Configure k8s cluster
-  delegate_to: localhost
-  import_tasks: configure-cluster.yml
-  when: kubeconfig_result.stat.exists
+- name: Configure keepalived
+  include_role:
+    name: keepalived
+    public: yes
+  vars:
+    kubeconfigfile: "{{ rke_cluster_kube_config }}"
+    keepalived_cluster_group_inventory_name: "{{ rke_cluster_group_inventory_name }}"
 
 - name: Get Rancher Install Status for first time setup check
   delegate_to: localhost
