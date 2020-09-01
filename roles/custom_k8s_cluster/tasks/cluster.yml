@@ -27,11 +27,28 @@
 - name: Set Fact for current cluster version, if it already exists
   delegate_to: localhost
   set_fact:
+    cluster_networkpolicy: "{{ cluster[0]['enableNetworkPolicy'] }}"
     cluster_version: "{{ cluster[0]['rancherKubernetesEngineConfig']['kubernetesVersion'] }}"
+    cluster_ingress: "{{ cluster[0]['rancherKubernetesEngineConfig']['ingress']['provider'] }}"
+    cluster_psp_template: "{{ cluster[0]['defaultPodSecurityPolicyTemplateId'] }}"
     cluster_id: "{{ cluster[0]['id'] }}"
   check_mode: no
   when:
   - (cluster | length) > 0
+
+- name: Print cluster facts from the Rancher API
+  debug:
+    msg:
+      - "Currently applied cluster version: {{ cluster_version | lower }}"
+      - "  -> Cluster version configuration: {{ custom_k8s_cluster_kubernetes_version | lower }}"
+      - "Currently applied cluster networkpolicy configuration: {{ cluster_networkpolicy | lower }}"
+      - "  -> Cluster networkpolicy configuration: {{ custom_k8s_cluster_enable_network_policy | lower }}"
+      - "Currently applied cluster ingress controller: {{ cluster_ingress | lower }}"
+      - "  -> Cluster ingress controller configuration: {{ custom_k8s_clusters_ingress_provider | lower }}"
+      - "Currently applied cluster PSP template: {{ cluster_psp_template | lower }}"
+      - "  -> Cluster PSP template configuration: {{ custom_k8s_clusters_default_psp | lower }}"
+  when:
+    - (cluster | length) > 0
 
 - name: Cluster does not exist, create new Cluster
   uri:
@@ -48,7 +65,7 @@
   when:
     - (cluster | length) == 0
 
-- name: Cluster does exist, check if version upgrade is requested
+- name: Cluster does exist, check if update is requested
   uri:
     url: "{{ custom_k8s_cluster_rancher_api }}/clusters/{{ cluster_id }}"
     validate_certs: "{{ custom_k8s_cluster_verify_ssl }}"
@@ -59,9 +76,12 @@
     body_format: json
     status_code: 200
     method: PUT
-  when:
-    - (cluster | length) > 0
-    - custom_k8s_cluster_kubernetes_version != cluster_version
+  when: |
+      ((cluster | length) > 0) and
+      ((custom_k8s_cluster_enable_network_policy | lower ) != (cluster_networkpolicy | lower) or
+      (custom_k8s_cluster_kubernetes_version | lower) != (cluster_version | lower) or
+      (custom_k8s_clusters_ingress_provider | lower) != (cluster_ingress | lower) or
+      (custom_k8s_clusters_default_psp | lower) != (cluster_psp_template | lower))
 
 - name: Set fact if existing cluster
   set_fact:
