@@ -16,6 +16,8 @@
 - name: Show nodes which are going to be added
   debug:
     msg: "{{ hostvars[item]['ansible_facts']['hostname'] }}{{ '.' if hostvars[item]['ansible_facts']['domain'] else '' }}{{ hostvars[item]['ansible_facts']['domain'] }}"
+  when:
+    - (cluster_nodes | json_query("json.data[?hostname == '" + hostvars[item]['ansible_facts']['hostname'] + ("." + hostvars[item]['ansible_facts']['domain'] if hostvars[item]['ansible_facts']['domain'] and custom_k8s_cluster_use_fqdn_nodename else "") +"']") | length) == 0
   with_items:
     - "{{ groups[custom_k8s_cluster_group_inventory_name] }}"
 

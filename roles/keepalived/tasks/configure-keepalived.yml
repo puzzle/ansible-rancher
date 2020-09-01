@@ -54,21 +54,13 @@
     - keepalived_ns_to_system_project
     - (rancherprojects | length) > 0
 
-- name: URL encode the Rancher System project ID
-  set_fact:
-    ranchersystemprojectid_url_encoded: "{{ ranchersystemprojectid | regex_replace(':','%3A') | string }}"
-  when:
-    - keepalived_deployment_on_custom_cluster
-    - keepalived_ns_to_system_project
-    - (rancherprojects | length) > 0
-
 - name: Print Rancher System project ID
   debug:
     msg: "{{ ranchersystemprojectid }}"
   when:
     - keepalived_deployment_on_custom_cluster
-    - (ranchersystemprojectid | length) > 0
     - keepalived_ns_to_system_project
+    - (ranchersystemprojectid | length) > 0
 
 - name: Move the keepalived namespace to the Rancher System project
   uri:
@@ -89,7 +81,7 @@
 
 - name: Set System project to PSP "unrestricted"
   uri:
-    url: "{{ keepalived_deployment_rancher_api }}/projects/{{ ranchersystemprojectid_url_encoded | first }}?action=setpodsecuritypolicytemplate"
+    url: "{{ keepalived_deployment_rancher_api }}/projects/{{ ranchersystemprojectid | first }}?action=setpodsecuritypolicytemplate"
     validate_certs: "{{ keepalived_deployment_rancher_api_verify_ssl }}"
     return_content: yes
     headers:
