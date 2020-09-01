@@ -14,3 +14,8 @@
     public: yes
   vars:
     keepalived_cluster_group_inventory_name: "{{ custom_k8s_cluster_group_inventory_name }}"
+    keepalived_deployment_on_custom_cluster: true
+    keepalived_deployment_rancher_api: "{{ custom_k8s_cluster_rancher_api }}"
+    keepalived_deployment_rancher_api_key: "{{ custom_k8s_cluster_api_key }}"
+    keepalived_deployment_rancher_api_verify_ssl: "{{ custom_k8s_cluster_verify_ssl }}"
+    keepalived_deployment_rancher_cluster_id: "{{ cluster.id }}"

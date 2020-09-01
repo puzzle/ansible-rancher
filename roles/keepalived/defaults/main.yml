@@ -2,6 +2,12 @@
 # Custom K8s cluster vIP HA setup
 # Useful when you want built-in HA for your custom K8s cluster ingress controller without external LB
 keepalived_enabled: false
+# Set the keepaliveds namespace name
+keepalived_ns: ipfailover
+# Move the keelalived namespace to the Rancher System project
+keepalived_ns_to_system_project: true
+# Configure Rancher System project PSP to: "none", "restricted" or "unrestricted" (only works when "keepalived_ns_to_system_project" is true)
+keepalived_rancher_system_project_psp: unrestricted
 # Specify if the keepalived setup should only use a private IP.
 # If so, set "keepalived_private_only" to "true"
 # and leave all "*_public_*" configuration options down here empty.
@@ -21,11 +27,19 @@ keepalived_public_node_toleration: ""
 # Specify where the custom K8s cluster is running. Currently supported environments are:
 # - "local": Local keepalived setup
 # - "cloudscale": Keepalived setup with cloudscale floating IP
-keepalived_setup_env: "local"
+keepalived_setup_env: local
 # If "keepalived_setup_env" is set to "cloudscale", a cloudscale API token needs to be provided.
 keepalived_cloudscale_api_token: "{{ cloudscale_api_token }}"
 # Keepalived service Docker image
-keepalived_image: "puzzle/keepalived:2.0.20"
+keepalived_image: puzzle/keepalived:2.0.20
+# Specify if keepalived daemonset deployment destination is on a custom K8s cluster.
+# If set to true, the keepalived role waits with its tasks until the destination cluster is ready and not in transitioning state
+keepalived_deployment_on_custom_cluster: false
+# If "keepalived_deployment_on_custom_cluster" is set to true the following Rancher API related variables ("keepalived_deployment_rancher_*") need to be set too.
+keepalived_deployment_rancher_api: https://rancher.example.com/v3
+keepalived_deployment_rancher_api_key: ""
+keepalived_deployment_rancher_api_verify_ssl: yes
+keepalived_deployment_rancher_cluster_id: ""
 # Keepalived IP address configuration
 keepalived_private_failover_track_interface_ip: eth0
 keepalived_private_failover_ip:

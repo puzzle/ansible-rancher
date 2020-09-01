@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: ipfailover-{{ item.vip | replace(":","-")}}
-  namespace: ipfailover
+  namespace: {{ keepalived_ns }}
   labels:
     failover: failover-{{ item.vip | replace(":","-") }}
 spec:
