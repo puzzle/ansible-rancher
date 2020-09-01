@@ -52,8 +52,8 @@ keepalived_image: puzzle/keepalived:2.0.20
 # If set to true, the keepalived role waits with its tasks until the destination cluster is ready and not in transitioning state
 keepalived_deployment_on_custom_cluster: false
 # If "keepalived_deployment_on_custom_cluster" is set to true the following Rancher API related variables ("keepalived_deployment_rancher_*") need to be set too.
-keepalived_deployment_rancher_api: https://rancher.example.com/v3
-keepalived_deployment_rancher_api_key: ""
+keepalived_deployment_rancher_api: "{{ custom_k8s_cluster_rancher_api }}"
+keepalived_deployment_rancher_api_key: "{{ custom_k8s_cluster_api_key }}"
 keepalived_deployment_rancher_api_verify_ssl: yes
 keepalived_deployment_rancher_cluster_id: ""
 # Keepalived IP address configuration
@@ -76,7 +76,7 @@ keepalived_public_failover_ipv6:
     master: rancher01
     password: my-top-secret-password3-here
 # Node groups to deploy keepalived on
-# Usually the default variable "keepalived_cluster_group_inventory_name" is replaces with "custom_k8s_cluster_group_inventory_name" or 
+# Usually the default variable "keepalived_cluster_group_inventory_name" is replaced with "custom_k8s_cluster_group_inventory_name" or 
 # "rke_cluster_group_inventory_name" for example - depending from which other role this keepalived role is called.
 keepalived_cluster_group_inventory_name: "{{ inventory_hostname | regex_replace('rancher_') }}"
 # Node groups
