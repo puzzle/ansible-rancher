@@ -14,7 +14,7 @@
 
 - name: Configure keepalived
   include_role:
-    name: keepalived
+    name: rancher_keepalived
     public: yes
   vars:
     kubeconfigfile: "{{ rke_cluster_kube_config }}"

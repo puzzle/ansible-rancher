@@ -10,7 +10,7 @@
 
 - name: Configure keepalived
   include_role:
-    name: keepalived
+    name: rancher_keepalived
     public: yes
   vars:
     keepalived_cluster_group_inventory_name: "{{ custom_k8s_cluster_group_inventory_name }}"
