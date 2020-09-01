@@ -6,7 +6,8 @@ Install keepalived daemonset on an existing K8s cluster
 Requirements
 ------------
 
-Only uses python and ansible.
+- Only uses python and ansible.
+- The keepalived daemonset pods only come up when the host port 80 becomes reachable (≃ an ingress controller is running)
 
 
 Role Variables
