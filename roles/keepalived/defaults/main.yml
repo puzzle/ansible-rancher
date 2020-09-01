@@ -60,7 +60,7 @@ keepalived_public_failover_ipv6:
     master: rancher01
     password: my-top-secret-password3-here
 # Node groups to deploy keepalived on
-# Usually the default variable "keepalived_cluster_group_inventory_name" is replaces with "custom_k8s_cluster_group_inventory_name" or 
+# Usually the default variable "keepalived_cluster_group_inventory_name" is replaced with "custom_k8s_cluster_group_inventory_name" or 
 # "rke_cluster_group_inventory_name" for example - depending from which other role this keepalived role is called.
 keepalived_cluster_group_inventory_name: "{{ inventory_hostname | regex_replace('rancher_') }}"
 # Node groups
