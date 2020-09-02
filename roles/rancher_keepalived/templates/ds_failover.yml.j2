@@ -41,7 +41,7 @@ spec:
       - env:
         {% if with_cloud_notify -%}
         - name: API_TOKEN
-          value: {{ custom_k8s_cluster_keepalived_cloudscale_api_token }}
+          value: {{ keepalived_cloudscale_api_token }}
         - name: SERVER_IDS
           value: '#PYTHON2BASH:[{{ server_ids }}]'
         - name: KEEPALIVED_NOTIFY
