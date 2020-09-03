@@ -112,6 +112,7 @@
   vars:
     nodes: "{{ groups[keepalived_private_node_group_ipv4] }}"
     unicast_peers: "{% for node in nodes %}''{{ hostvars[node]['ansible_' + keepalived_private_failover_track_interface_ip]['ipv4']['address'] }}'',{% endfor %}"
+    server_ids: "{% for node in nodes if keepalived_setup_env == 'cloudscale' %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
     with_cloud_notify: "{{ 'True' if keepalived_setup_env == 'cloudscale' else 'False' }}"
     node_selector: "{{ keepalived_private_node_selector }}"
     node_toleration: "{{ keepalived_private_node_toleration }}"
@@ -124,11 +125,11 @@
     state: present
     definition: "{{ lookup('template', 'ds_failover.yml.j2') }}"
   with_items:
-    - "{{ keepalived_public_failover_track_interface_ip }}"
+    - "{{ keepalived_public_failover_ip }}"
   vars:
     nodes: "{{ groups[keepalived_public_node_group_ipv4] }}"
     unicast_peers: "{% for node in nodes %}''{{ hostvars[node]['ansible_' + keepalived_public_failover_track_interface_ip]['ipv4']['address'] }}'',{% endfor %}"
-    server_ids: "{% for node in nodes %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
+    server_ids: "{% for node in nodes if keepalived_setup_env == 'cloudscale' %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
     with_cloud_notify: "{{ 'True' if keepalived_setup_env == 'cloudscale' else 'False' }}"
     node_selector: "{{ keepalived_public_node_selector }}"
     node_toleration: "{{ keepalived_public_node_toleration }}"
@@ -143,11 +144,11 @@
     state: present
     definition: "{{ lookup('template', 'ds_failover.yml.j2') }}"
   with_items:
-    - "{{ keepalived_public_failover_track_interface_ipv6 }}"
+    - "{{ keepalived_public_failover_ipv6 }}"
   vars:
     nodes: "{{ groups[keepalived_public_node_group_ipv6] }}"
     unicast_peers: "{% for node in nodes %}''{{ hostvars[node]['ansible_default_ipv6']['address'] }}'',{% endfor %}"
-    server_ids: "{% for node in nodes %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
+    server_ids: "{% for node in nodes if keepalived_setup_env == 'cloudscale' %}{''{{ hostvars[node]['inventory_hostname'] }}'':''{{ hostvars[node]['cloudscale_vm']['uuid'] }}''},{% endfor %}"
     with_cloud_notify: "{{ 'True' if keepalived_setup_env == 'cloudscale' else 'False' }}"
     node_selector: "{{ keepalived_public_node_selector }}"
     node_toleration: "{{ keepalived_public_node_toleration }}"
