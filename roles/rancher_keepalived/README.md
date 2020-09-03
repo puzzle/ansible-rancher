@@ -45,7 +45,7 @@ keepalived_public_node_toleration: ""
 # - "cloudscale": Keepalived setup with cloudscale floating IP
 keepalived_setup_env: local
 # If "keepalived_setup_env" is set to "cloudscale", a cloudscale API token needs to be provided.
-keepalived_cloudscale_api_token: "{{ cloudscale_api_token }}"
+keepalived_cloudscale_api_token: ""
 # Keepalived service Docker image
 keepalived_image: puzzle/keepalived:2.0.20
 # Specify if keepalived daemonset deployment destination is on a custom K8s cluster.
