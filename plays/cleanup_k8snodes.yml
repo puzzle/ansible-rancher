@@ -5,6 +5,14 @@
       shell:
         cmd: "docker rm -f $(docker ps -qa)"
       ignore_errors: True
+    - name: Unmount kubelet mounts
+      shell:
+        cmd: "for mount in $(mount | grep tmpfs | grep '/var/lib/kubelet' | awk '{ print $3 }') /var/lib/kubelet /var/lib/rancher; do umount $mount; done"
+      ignore_errors: True
+    - name: Remove Docker Images
+      shell:
+        cmd: "docker rmi -f $(docker images -q)"
+      ignore_errors: True
     - name: Remove Docker Volumes
       shell:
         cmd: "docker volume rm $(docker volume ls -q)"
