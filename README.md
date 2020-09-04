@@ -87,11 +87,11 @@ Role to deploy a Rancher Control Plane with `rke` and `helm`. Check [roles/rke_r
 
 ### custom_rk8s_cluster
 
-Role to create a custom kubernetes cluster on a Rancher Control Plane and add nodes to the cluster. Check [roles/custom_k8s_cluster/README.md](./roles/custom_k8s_cluster/README.md) for more details.
+Role to create a custom Kubernetes cluster on a Rancher Control Plane and add nodes to the cluster. Check [roles/custom_k8s_cluster/README.md](./roles/custom_k8s_cluster/README.md) for more details.
 
 ### rancher_keepalived
 
-Role to deploy keepalived daemonsets on Rancher Control Plane **and** ustom kubernetes clusters. Provides one or multiple highly available virtual IPv4/IPv6 address to the regarding cluster. Usually directly called from `rke_rancher_clusters` and `custom_rk8s_cluster`.
+Role to deploy keepalived Daemonsets on Rancher Control Plane **and** custom Kubernetes clusters. Provides one or multiple highly available virtual IPv4/IPv6 address(es) to the regarding cluster. Usually directly called from `rke_rancher_clusters` and `custom_rk8s_cluster`.
 
 ## License
 
