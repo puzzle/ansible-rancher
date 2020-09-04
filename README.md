@@ -1,7 +1,7 @@
 # Ansible Playbooks and Roles for Rancher
 
 **Disclaimer!**: We use this as a base for our own and customer setup at puzzle. Heavy work in progress and a lot of things that can be improved.
-Feel free to contribute. I'm happy to assist.
+Feel free to contribute. We are happy to assist.
 
 These Ansible playbook and roles can be used to:
 * create a [Rancher Control Plane](https://rancher.com/) using [rke](https://github.com/rancher/rke) and [helm](https://helm.sh/)
@@ -73,7 +73,7 @@ With this playbook to can cleanup a node which was already added to a kubernetes
 
 ## Roles
 
-### Docker
+### docker
 
 Simple role to install Docker. Check [roles/docker/README.md](./roles/docker/README.md) for more details.
 
@@ -89,6 +89,9 @@ Role to deploy a Rancher Control Plane with `rke` and `helm`. Check [roles/rke_r
 
 Role to create a custom kubernetes cluster on a Rancher Control Plane and add nodes to the cluster. Check [roles/custom_k8s_cluster/README.md](./roles/custom_k8s_cluster/README.md) for more details.
 
+### rancher_keepalived
+
+Role to deploy keepalived daemonsets on Rancher Control Plane **and** ustom kubernetes clusters. Provides one or multiple highly available virtual IPv4/IPv6 address to the regarding cluster. Usually directly called from `rke_rancher_clusters` and `custom_rk8s_cluster`.
 
 ## License
 
@@ -96,4 +99,5 @@ GPLv3
 
 ## Author Information
 
-* Sebastian Plattner (plattner@puzzle.ch)
+* Sebastian Plattner
+* Philip Schmid
