@@ -100,7 +100,7 @@ data:
     keepalived\n# (ie don't include parameters in the notify line).\n# arguments\n#
     $1 = \"GROUP\"|\"INSTANCE\"\n# $2 = name of group or instance\n# $3 = target state
     of transition\n#     (\"MASTER\"|\"BACKUP\"|\"FAULT\")\n\nTYPE=$1\nNAME=$2\nSTATE=$3\n\nSERVERNAME=\"$(hostname)\"\n\nfor
-    info in $(complex-bash-env iterate \"$SERVER_IDS\")\ndo\n\n        if [ $(complex-bash-env
+    info in $(complex-bash-env iterate SERVER_IDS)\ndo\n\n        if [ $(complex-bash-env
     isRow \"${!info}\") = true ]; then\n\n                key=$(complex-bash-env getRowKeyVarName
     \"${!info}\")\n                value=$(complex-bash-env getRowValueVarName \"${!info}\")\n\n\t\t
     \           currentserver=${!key}\n                if [ \"$currentserver\" ==
