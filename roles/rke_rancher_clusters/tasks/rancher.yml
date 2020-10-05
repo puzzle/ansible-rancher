@@ -66,7 +66,7 @@
   when:
   - rancher_certmanager_enabled
 
-- name: Create tls secret when not using Let's Encrypt
+- name: Create tls secret when using "Bring your own certificate" Rancher certificate method (method 3)
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
     state: present
@@ -81,9 +81,9 @@
         tls.key: "{{ rancher_tls_key }}"
       type: kubernetes.io/tls
   when:
-  - not rancher_certmanager_enabled
+  - rancher_bring_your_own_certificates
 
-- name: Create tls cacerts secret when not using Let's Encrypt and using self-signed Rancher TLS cert
+- name: Create tls cacerts secret when using "Bring your own certificate" Rancher certificate method (method 3) and using self-signed Rancher TLS cert
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
     state: present
@@ -96,27 +96,49 @@
       data:
         cacerts.pem: "{{ rancher_tls_cacerts }}"
   when:
-  - not rancher_certmanager_enabled
+  - rancher_bring_your_own_certificates
   - rancher_tls_self_signed
 
-- name: Install Rancher with Let's Encrypt
+# Rancher Certificate Method 1:
+- name: Install Rancher with generated self-signed certificates (via Cert-Manager)
+  command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=rancher --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
+  changed_when: false
+  when:
+  - rancher_certmanager_enabled
+  - rancher_generated_self_signed_certificates
+  - not rancher_lets_encrypt_generated_certificated
+  - not rancher_bring_your_own_certificates
+
+# Rancher Certificate Method 2:
+- name: Install Rancher with Let's Encrypt (via Cert-Manager)
   command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=letsEncrypt --set letsEncrypt.email={{ rancher_letsencrypt_email }} --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
   changed_when: false
   when:
   - rancher_certmanager_enabled
+  - not rancher_generated_self_signed_certificates
+  - rancher_lets_encrypt_generated_certificated
+  - not rancher_bring_your_own_certificates
 
+# Rancher Certificate Method 3a:
 - name: Install Rancher with officially signed certificates
   command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
   changed_when: false
   when:
   - not rancher_certmanager_enabled
+  - not rancher_generated_self_signed_certificates
+  - not rancher_lets_encrypt_generated_certificated
+  - rancher_bring_your_own_certificates
   - not rancher_tls_self_signed
 
+# Rancher Certificate Method 3b:
 - name: Install Rancher with self-signed certificates
   command: "{{ helm_binary }} upgrade --install --kubeconfig {{ rke_cluster_kube_config }} --namespace cattle-system --set hostname={{ rancher_hostname }} --set ingress.tls.source=secret --set privateCA=true --version {{ helm_rancher_version }} rancher {{ helm_rancher_repo }}/rancher"
   changed_when: false
   when:
   - not rancher_certmanager_enabled
+  - not rancher_generated_self_signed_certificates
+  - not rancher_lets_encrypt_generated_certificated
+  - rancher_bring_your_own_certificates
   - rancher_tls_self_signed
 
 - name: Wait for Rancher Deployment to be ready
