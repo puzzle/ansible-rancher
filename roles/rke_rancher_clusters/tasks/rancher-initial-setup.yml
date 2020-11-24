@@ -61,7 +61,7 @@
     url: "https://{{ rancher_hostname }}/v3/settings/server-url"
     return_content: yes
     body: 
-      value: "{{ rancher_hostname }}"
+      value: "https://{{ rancher_hostname }}"
     body_format: json
     method: PUT
     status_code:
