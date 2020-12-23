@@ -18,9 +18,12 @@
 
 - name: install Docker service
   block:
-  - name: set docker installation script facts
+  - name: set docker installation script fact
     set_fact:
       docker_installation_script: "{{ docker_version }}.sh"
+
+  - name: set docker installation script path fact
+    set_fact: 
       docker_installation_script_full_path: "/tmp/{{ docker_installation_script }}"
 
   - name: get Rancher's Docker installation script
@@ -29,13 +32,13 @@
       dest: "{{ docker_installation_script_full_path }}"
 
   - name: execute the Docker installation script
-    shell: "{{ docker_installation_script_full_path }}"
+    shell: "bash {{ docker_installation_script_full_path }}"
 
   - name: remove the Docker installation script
     file: 
       path: "{{ docker_installation_script_full_path }}"
       state: absent
-  when: (installed_docker_version is undefined or not installed_docker_version.startswith(docker_version))
+  when: (installed_docker_version.stdout is undefined or not docker_version in installed_docker_version.stdout)
 
 - name: Enable IP Forwarding
   sysctl:
