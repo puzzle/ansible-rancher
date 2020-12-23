@@ -3,4 +3,4 @@
   hosts: rancher_k8s_nodes
   roles:
     - role: docker
-    - role: rke_node
+    - role: firewalld

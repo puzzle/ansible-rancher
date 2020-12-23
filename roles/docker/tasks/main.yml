@@ -1,16 +1,4 @@
 ---
-
-- name: Install firewalld
-  yum:
-    name: "firewalld"
-    state: present
-
-- name: Enable and start firewalld
-  systemd:
-    state: started
-    name: firewalld
-    enabled: yes
     
 - name: basic docker setup
   import_tasks: docker_setup.yml
-

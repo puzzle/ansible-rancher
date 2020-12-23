@@ -65,7 +65,7 @@ Make sure to set at least the following vars:
 
 ### site.yml
 
-Playbook to apply `docker`, `rke_node`, `rke_rancher_clusters` & `custom_rk8s_cluster`. Check [plays/prepare_k8s_nodes.yml](./plays/prepare_k8s_nodes.yml), [plays/deploy_rancher.yml](./plays/deploy_rancher.yml) & [plays/deploy_k8s_cluster.yml](./plays/deploy_k8s_cluster.yml) for details.
+Playbook to apply `docker`, `firewalld`, `rke_rancher_clusters` & `custom_rk8s_cluster`. Check [plays/prepare_k8s_nodes.yml](./plays/prepare_k8s_nodes.yml), [plays/deploy_rancher.yml](./plays/deploy_rancher.yml) & [plays/deploy_k8s_cluster.yml](./plays/deploy_k8s_cluster.yml) for details.
 
 ### cleanup_k8snode.yml
 
@@ -77,9 +77,9 @@ With this playbook to can cleanup a node which was already added to a kubernetes
 
 Simple role to install Docker. Check [roles/docker/README.md](./roles/docker/README.md) for more details.
 
-### rke_node
+### firewalld
 
-Role to prepare a vm which then can be used as a node in a Rancher Control Plane or a custom Kubernetes Cluster. The role currently only configures firewalld depending on the `k8s_role` the node has. Based on https://rancher.com/docs/rancher/v2.x/en/installation/options/firewall/
+The role only configures firewalld depending on the `k8s_role` the node has (this behaviour can also be disabled if you want to). Based on https://rancher.com/docs/rancher/v2.x/en/installation/options/firewall/
 
 ### rke_rancher_clusters
 

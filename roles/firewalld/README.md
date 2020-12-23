@@ -1,4 +1,4 @@
-ansible-role-rke_node
+ansible-role-firewalld
 ==================
 
 Node preparation for hosts to be used with RKE
@@ -18,6 +18,8 @@ k8s_roles:
 - controlplane
 - etcd
 - worker
+enable_firewalld: true
+manage_rancher_related_firewalld_rules: true
 ```
 
 Dependencies
