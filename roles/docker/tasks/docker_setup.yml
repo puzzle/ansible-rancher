@@ -6,15 +6,37 @@
     name: "{{ docker_required_packages }}"
     state: present
 
-- name: add docker repository
-  get_url:
-    url: "{{ docker_pkg_repo }}"
-    dest: /etc/yum.repos.d/docker-ce.repo
+- name: gather the package facts
+  package_facts:
+    manager: auto
 
-- name: install docker
-  yum:
-    name: "{{ docker_package }}"
-    state: present
+- name: check if docker is installed and it so, get the docker version
+  shell: "docker -v | cut -d ' ' -f 3 | cut -d ',' -f 1"
+  when:
+  - "'docker' in ansible_facts.packages"
+  register: installed_docker_version
+
+- name: install Docker service
+  block:
+  - set_fact:
+      docker_installation_script: "{{ docker_version }}.sh"
+      docker_installation_script_full_path: "/tmp/{{ docker_installation_script }}"
+
+  - name: get Rancher's Docker installation script
+    get_url:
+      url: "https://releases.rancher.com/install-docker/{{ docker_installation_script }}"
+      dest: "{{ docker_installation_script_full_path }}"
+
+  - name: execute the Docker installation script
+    shell: "{{ docker_installation_script_full_path }}"
+
+  - name: remove the Docker installation script
+    file: 
+      path: "{{ docker_installation_script_full_path }}"
+      state: absent
+  when:
+  - installed_docker_version is undefined
+  - not installed_docker_version.startswith(docker_version)
 
 - name: Enable IP Forwarding
   sysctl:

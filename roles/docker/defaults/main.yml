@@ -7,6 +7,5 @@ docker_required_packages:
   - lvm2
   - pygpgme
 
-docker_pkg_repo: "https://download.docker.com/linux/centos/docker-ce.repo"
-
-docker_package: docker-ce
+# See https://github.com/rancher/install-docker for available versions.
+docker_version: "19.03"
