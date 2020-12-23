@@ -18,7 +18,8 @@
 
 - name: install Docker service
   block:
-  - set_fact:
+  - name: set docker installation script facts
+    set_fact:
       docker_installation_script: "{{ docker_version }}.sh"
       docker_installation_script_full_path: "/tmp/{{ docker_installation_script }}"
 
@@ -34,9 +35,7 @@
     file: 
       path: "{{ docker_installation_script_full_path }}"
       state: absent
-  when:
-  - installed_docker_version is undefined
-  - not installed_docker_version.startswith(docker_version)
+  when: (installed_docker_version is undefined or not installed_docker_version.startswith(docker_version))
 
 - name: Enable IP Forwarding
   sysctl:
