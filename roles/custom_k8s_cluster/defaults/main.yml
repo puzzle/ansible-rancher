@@ -20,7 +20,7 @@ custom_k8s_clusters_default_psp: "restricted"
 # Enable Network Segregation between Projects
 custom_k8s_cluster_enable_network_policy: true
 # Kubernetes Version
-custom_k8s_cluster_kubernetes_version: "v1.19.4-rancher1-1"
+custom_k8s_cluster_kubernetes_version: "v1.18.12-rancher1-1"
 # Ingress Provider (none, nginx)
 custom_k8s_clusters_ingress_provider: "none"
 

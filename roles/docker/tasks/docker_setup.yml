@@ -16,6 +16,12 @@
   - "'docker' in ansible_facts.packages"
   register: installed_docker_version
 
+- name: Create temporary installation script directory
+  tempfile:
+    state: directory
+    suffix: docker_installation
+  register: docker_installation_dir
+
 - name: install Docker service
   block:
   - name: set docker installation script fact
@@ -24,12 +30,13 @@
 
   - name: set docker installation script path fact
     set_fact: 
-      docker_installation_script_full_path: "/tmp/{{ docker_installation_script }}"
+      docker_installation_script_full_path: "{{ docker_installation_dir.path }}/{{ docker_installation_script }}"
 
   - name: get Rancher's Docker installation script
     get_url:
       url: "https://releases.rancher.com/install-docker/{{ docker_installation_script }}"
       dest: "{{ docker_installation_script_full_path }}"
+      mode: '0755'
 
   - name: execute the Docker installation script
     shell: "bash {{ docker_installation_script_full_path }}"
@@ -38,7 +45,14 @@
     file: 
       path: "{{ docker_installation_script_full_path }}"
       state: absent
-  when: (installed_docker_version.stdout is undefined or not docker_version in installed_docker_version.stdout)
+  when: (installed_docker_version is skipped or not docker_version in installed_docker_version.stdout)
+  always:
+  - name: Cleanup docker_installation_dir
+    file:
+      path: "{{ docker_installation_dir.path }}"
+      state: absent
+    when: docker_installation_dir.path is defined
+
 
 - name: Enable IP Forwarding
   sysctl:
