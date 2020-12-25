@@ -13,7 +13,7 @@
     mode: 0777
   changed_when: false
 
-- name: Retrieve helm binary archive.
+- name: Retrieve helm binary archive
   unarchive:
     src: "{{ helm_binary_download_url }}"
     dest: "./"
@@ -21,7 +21,7 @@
   changed_when: false
   check_mode: no
 
-- name: Move helm binary into place.
+- name: Move helm binary into place
   copy:
     src: "linux-amd64/helm"
     dest: "{{ helm_binary }}"

@@ -6,15 +6,55 @@
     name: "{{ docker_required_packages }}"
     state: present
 
-- name: add docker repository
-  get_url:
-    url: "{{ docker_pkg_repo }}"
-    dest: /etc/yum.repos.d/docker-ce.repo
+- name: gather the package facts
+  package_facts:
+    manager: auto
 
-- name: install docker
-  yum:
-    name: "{{ docker_package }}"
-    state: present
+- name: check if docker is installed and if so, get the docker version
+  shell: "docker -v | cut -d ' ' -f 3 | cut -d ',' -f 1"
+  changed_when: false
+  when:
+  - "'docker-ce' in ansible_facts.packages"
+  register: installed_docker_version
+
+- name: create temporary installation script directory
+  changed_when: false
+  tempfile:
+    state: directory
+    suffix: _docker_installation
+  register: docker_installation_dir
+
+- name: install Docker service
+  block:
+  - name: set docker installation script fact
+    set_fact:
+      docker_installation_script: "{{ docker_version }}.sh"
+
+  - name: set docker installation script path fact
+    set_fact: 
+      docker_installation_script_full_path: "{{ docker_installation_dir.path }}/{{ docker_installation_script }}"
+
+  - name: get Rancher's Docker installation script
+    get_url:
+      url: "https://releases.rancher.com/install-docker/{{ docker_installation_script }}"
+      dest: "{{ docker_installation_script_full_path }}"
+      mode: '0755'
+
+  - name: execute the Docker installation script
+    shell: "bash {{ docker_installation_script_full_path }}"
+
+  - name: remove the Docker installation script
+    file: 
+      path: "{{ docker_installation_script_full_path }}"
+      state: absent
+  when: (installed_docker_version is skipped or not docker_version in installed_docker_version.stdout)
+
+- name: cleanup docker_installation_dir
+  changed_when: false
+  file:
+    path: "{{ docker_installation_dir.path }}"
+    state: absent
+  when: docker_installation_dir is defined
 
 - name: Enable IP Forwarding
   sysctl:
@@ -32,6 +72,7 @@
     state: started
 
 - name: setup a cronjob for docker cleanup
+  changed_when: false
   cron:
     name: docker cleanup
     minute: "00"
@@ -41,6 +82,7 @@
     cron_file: docker_cleanup
 
 - name: setup a cronjob for docker volumes cleanup
+  changed_when: false
   cron:
     name: docker volumes cleanup
     minute: "15"
@@ -52,6 +94,6 @@
 - name: adding existing user '{{ ansible_user }}' to group docker
   user:
     name: '{{ ansible_user }}'
-    groups: docker
+    groups:
+    - docker
     append: yes
-

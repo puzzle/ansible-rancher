@@ -66,6 +66,10 @@
   when:
   - rancher_certmanager_enabled
 
+- name: Wait 20 seconds for cert-manager to properly run
+  pause:
+    seconds: "20"
+
 - name: Create tls secret when using "Bring your own certificate" Rancher certificate method (method 3)
   k8s:
     kubeconfig: "{{ rke_cluster_kube_config }}"
