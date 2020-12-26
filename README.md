@@ -5,7 +5,44 @@ Feel free to contribute. We are happy to assist.
 
 These Ansible playbook and roles can be used to:
 * create a [Rancher Control Plane](https://rancher.com/) using [rke](https://github.com/rancher/rke) and [helm](https://helm.sh/)
-* add a [custom kubernetes cluster] to an existing Rancher Control Plane
+* add a custom Kubernetes cluster to an existing Rancher Control Plane
+
+## Prerequisites
+We recommend you to run this playbooks inside a [pipenv](https://pipenv.pypa.io/en/latest/).
+
+All dependencies are managed using pipenv, to get a virtual environment use:
+```bash
+# Only if you don't have pipenv yet:
+pip install --user pipenv
+```
+
+Switch to the virtual environment and install dependencies into:
+```bash
+pipenv shell --three
+pipenv install
+# Now you can run ansible-playbook commands inside this pipenv shell:
+ansible-playbook ...
+```
+
+You can verify the installed dependencies using `pipenv graph` (inside the pipenv shell):
+```bash
+$ pipenv graph
+ansible==2.9.12
+  - cryptography [required: Any, installed: 3.2]
+  <--- output truncated --->
+  - PyYAML [required: Any, installed: 5.3.1]
+jmespath==0.10.0
+openshift==0.11.2
+  - jinja2 [required: Any, installed: 2.11.2]
+    - MarkupSafe [required: >=0.23, installed: 1.1.1]
+  - kubernetes [required: ~=11.0.0, installed: 11.0.0]
+    - certifi [required: >=14.05.14, installed: 2020.6.20]
+  <--- output truncated --->
+  - six [required: Any, installed: 1.15.0]
+selinux==0.2.1
+  - distro [required: >=1.3.0, installed: 1.5.0]
+  - setuptools [required: >=39.0, installed: 50.3.2]
+```
 
 ## Inventory
 
