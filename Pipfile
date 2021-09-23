@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-ansible = ">2.9,<2.11"
+ansible = ">2.9,<4.3"
 openshift = "*"
 jmespath = "*"
 selinux = "*"
